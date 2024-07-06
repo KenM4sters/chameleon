@@ -9,4 +9,4 @@ export abstract class ITexture
 
     public abstract Resize(width : number, height : number) : void;
 
-}
+};

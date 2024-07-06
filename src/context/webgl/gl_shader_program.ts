@@ -1,47 +1,18 @@
 import { Ref } from "../../utils";
-import { IShaderProgram } from "../shader_program";
+import { IShaderProgram, ShaderInputFormat } from "../shader_program";
 import { GLRenderer } from "./gl_renderer";
 
 
-export enum ShaderAttribType 
-{
-    i32,
-    f32,
-    vec2f,
-    vec3f,
-    vec4f,
-    mat3x3,
-    mat4x4,
-};
-
-export enum ShaderUniformType 
-{
-    
-};
-
-export function GetShaderTypeSize(type : ShaderAttribType) : number 
-{
-    switch(type) 
-    {
-        case ShaderAttribType.i32:       return 4;
-        case ShaderAttribType.f32:       return 4;
-        case ShaderAttribType.vec2f:     return 4*2;
-        case ShaderAttribType.vec3f:     return 4*3;
-        case ShaderAttribType.vec4f:     return 4*4;
-        case ShaderAttribType.mat3x3:    return 4*9;
-        case ShaderAttribType.mat4x4:    return 4*16;
-    }
-}
 
 export interface GLShaderStageBlueprint
 {
-    code : string;
-}
+    code : string;  
+};
 
 export interface GLShaderProgramBlueprint 
 {
     vertexStage : GLShaderStage;
-    fragmentStage :GLShaderStage;
+    fragmentStage : GLShaderStage;
     geometryStage : GLShaderStage | null;
 };
 
@@ -54,7 +25,7 @@ export class GLShaderStage
     }
 
     public readonly blueprint : GLShaderStageBlueprint
-}
+};
 
 
 /**
@@ -131,4 +102,4 @@ export class GLShaderProgram extends IShaderProgram
     }
     
     public Id : Ref<WebGLShader>;
-}
+};

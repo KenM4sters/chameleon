@@ -8,4 +8,4 @@ export abstract class IFramebuffer
     }
 
     public abstract Resize(width : number, height : number) : void;
-}
+};

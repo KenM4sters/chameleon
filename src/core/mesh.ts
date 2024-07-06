@@ -1,9 +1,10 @@
+import * as glm from "gl-matrix";
 
 
 export interface MeshBlueprint 
 {
     
-};  
+};   
 
 export class Mesh 
 {
@@ -11,4 +12,8 @@ export class Mesh
     {
         
     }
+
+    public position : glm.vec3;
+    public rotation : glm.quat;
+    public scale : glm.vec3;
 };

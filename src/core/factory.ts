@@ -13,4 +13,9 @@ export class Factory
     {
 
     }
+
+    public LoadMesh() : void 
+    {
+        
+    }
 };

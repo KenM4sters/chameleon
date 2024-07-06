@@ -7,7 +7,7 @@ export enum GraphicsContexts
 {
     WebGL,
     WebGPU
-}   
+}; 
 
 export class Graphics 
 {
@@ -44,4 +44,4 @@ export class Graphics
     public static canvas : HTMLCanvasElement;
 
     private renderer : IRenderer;
-}
+};
