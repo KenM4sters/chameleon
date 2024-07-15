@@ -1,3 +1,84 @@
+import { GLRenderer } from "./context/webgl/gl_renderer";
+
+
+/**
+ * @brief Wrapper around any variable to ensure that it's passed by reference and not value.
+ */
+export class Ref<T> 
+{
+    constructor(public val : T) {};
+};
+
+export enum GraphicsBackend 
+{
+    OpenGL,
+    Vulkan
+};
+
+export enum SamplerWrapType 
+{
+    WrapS,
+    WrapT,
+    WrapR
+};
+
+export enum SamplerWrapMode
+{
+    Repeat,
+    MirroredRepeat,
+    ClampToEdge,
+    ClampToBorder
+};
+
+export enum SamplerFilterMode 
+{
+    Nearest,
+    Linear
+};
+
+export enum Dimension 
+{
+    Texture2D,
+    Texture3D,
+    TextureCube
+};
+
+export enum TextureInternalFormat 
+{
+    R16F,
+    RG,
+    RG16F,
+    RGB,
+    RGB16F,
+    RBG32F,
+    RGBA,
+    RGBA16F,
+    RGBA32F,
+    DepthStencil16F 
+};
+
+export enum TextureFormat 
+{
+    R,
+    RG,
+    RGB,
+    RGBA,
+};
+
+
+export enum DrawMode 
+{
+    Arrays,
+    Indexed
+};
+
+export enum DrawShape
+{
+    Triangles,
+    TrianglesList,
+    TrianglesFan,
+    Points
+};
 
 
 /**
@@ -30,12 +111,11 @@ export class BufferAttribute
     public count : number;
 }
 
-
 /**
  * @brief Holds an array of BufferAttributes to wholly describe a single vertex, which is
  * used by the corresponding VertexArray instance to set the layout information.
  */
-export class BufferAttribLayout
+export class VertexInput
 {
     /**
      * @brief Constructs a new BufferAttribLayout from an array of BufferAttributes.
@@ -104,3 +184,41 @@ export class BufferAttribLayout
     public size : number = 0;
     public stride : number = 0;
 }
+
+
+
+export class Graphics 
+{
+    constructor(canvas : HTMLCanvasElement) 
+    {
+        Graphics.canvas = canvas;
+        Graphics.gl = canvas.getContext("webgl2") as WebGL2RenderingContext;
+
+        window.addEventListener("resize", () => this.Resize());
+
+        this.renderer = new GLRenderer();
+
+    }
+
+    /**
+     * @brief Called whenever the window is resized, and resizes the canvas to match, for now
+     * at least, the new window dimensions. Resize() is then called on the renderer with the new
+     * dimensions.
+     */
+    private Resize() : void 
+    {
+        if(Graphics.canvas.width != window.innerWidth || Graphics.canvas.height != window.innerHeight)
+        {
+            Graphics.canvas.width = window.innerWidth;
+            Graphics.canvas.height = window.innerHeight;
+        }
+
+        this.renderer.Resize(Graphics.canvas.width, Graphics.canvas.height);
+    }
+    
+    
+    public static canvas : HTMLCanvasElement;
+    public static gl : WebGL2RenderingContext;
+
+    private renderer : GLRenderer;
+};

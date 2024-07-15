@@ -1,14 +1,11 @@
-import { BufferAttribLayout } from "../../core/vertex_layout";
-import { Ref } from "../../utils";
-import { IBuffer } from "../buffer";
+import { Ref } from "../../types";;
 import { GLRenderer } from "./gl_renderer";
 
 
-export class GLBuffer extends IBuffer 
+export class GLBuffer 
 {
     constructor() 
     {
-        super();
     }
 };
 
@@ -109,4 +106,3 @@ export class GLIndexBuffer
     public readonly uniqueOffset : number;
     public readonly uniqueSize : number;
 };
-

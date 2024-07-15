@@ -1,9 +1,0 @@
-
-
-export class IVertexInput 
-{
-    constructor() 
-    {
-        
-    }
-;}

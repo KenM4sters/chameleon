@@ -1,4 +1,4 @@
-import { Ref } from "../../utils";
+import { Ref } from "../../types";
 import { IFramebuffer } from "../framebuffer";
 import { GLRenderer } from "./gl_renderer";
 import { GLTexture, GLTexture2D, GLTextureCube } from "./gl_texture";

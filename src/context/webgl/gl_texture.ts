@@ -1,4 +1,4 @@
-import { Ref } from "../../utils";
+import { Ref } from "../../types";
 import { ITexture } from "../texture";
 import { GLRenderer } from "./gl_renderer";
 

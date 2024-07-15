@@ -1,6 +1,4 @@
-import { BufferAttribLayout } from "../../core/vertex_layout";
-import { Ref } from "../../utils";
-import { IVertexInput } from "../vertex_input";
+import { Ref } from "../../types";
 import { GLIndexBuffer, GLVertexBuffer } from "./gl_buffer";
 import { GLRenderer } from "./gl_renderer";
 
@@ -10,7 +8,7 @@ import { GLRenderer } from "./gl_renderer";
  * @brief A GLVertexInput instance should be used in conjunction with a GLVertexBuffer and/or 
  * GLIndexBuffer instance to accurately decsribe the vertices in the vertex buffer. 
  */
-export class GLVertexInput 
+export class GLVertexInput extends IVertexInput 
 {
     /**
      * @brief Constructs a WebGLVertexArray instance and defines the necessary layout attributes
@@ -18,8 +16,10 @@ export class GLVertexInput
      * @param vBuffer The vertex buffer that contains the vertex data that this vertex array will describe.
      * @param iBuffer The index buffer that corresponds to the vertex buffer, null by default.
      */
-    constructor(vBuffer : GLVertexBuffer, iBuffer : GLIndexBuffer | null = null) 
+    constructor(vertices : Float32Array, attributes : BufferAttribute[], indices : Uint32Array) 
     {
+        super();
+
         this.vertexBuffer = vBuffer;
         this.indexBuffer = iBuffer;
         
@@ -43,7 +43,7 @@ export class GLVertexInput
             gl.vertexAttribPointer(layoutLoc, attrib.count, gl.FLOAT, false, uniqueLayout.stride, layoutOffset + attrib.offset);
             gl.enableVertexAttribArray(layoutLoc);
 
-            layoutLoc++;
+            layoutLoc++; 
         }
 
         gl.bindVertexArray(null);
