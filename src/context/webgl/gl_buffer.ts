@@ -1,108 +1,150 @@
-import { Ref } from "../../types";;
-import { GLRenderer } from "./gl_renderer";
+import { IndexBuffer, UniformBuffer, VertexBuffer } from "../../graphics";
+import { IndexBufferProps, VertexBufferProps, VertexData } from "../../types";
+import { gl } from "./gl_context";
 
-
-export class GLBuffer 
-{
-    constructor() 
-    {
-    }
-};
 
 /**
- * @brief Constructs a WebGLBuffer from vertices and a BufferLayout.
+ * @brief Constructs a GLVertexBuffer from vertices and a BufferLayout.
  */
-export class GLVertexBuffer extends GLBuffer
+export class GLVertexBuffer extends VertexBuffer
 {
-    constructor(vertices : Float32Array, layout : BufferAttribLayout)
+    constructor()
     {
         super();
 
-        this.uniqueVertexData = vertices;
-        
-        // Cache new vertex data into a single shared Float32Array.
-        var temp = new Float32Array(GLVertexBuffer.cachedVertexData.length + this.uniqueVertexData.length);
-        temp.set(GLVertexBuffer.cachedVertexData, 0);
-        temp.set(this.uniqueVertexData, GLVertexBuffer.cachedVertexData.length);
-        GLVertexBuffer.cachedVertexData = temp;
-
-        // Set the layout of our updated cached vertex data;
-        this.uniqueLayout = layout;
-
-        // Update existing layout properties to reflect the new layout.
-        this.uniqueSize = this.uniqueVertexData.length * this.uniqueVertexData.BYTES_PER_ELEMENT
-        this.uniqueOffset = GLVertexBuffer.cachedSize;
-        this.nUniqueVertices = this.uniqueSize / this.uniqueLayout.size;
-                
-        GLVertexBuffer.cachedSize += this.uniqueSize;
-        this.PushLayoutToBuffer();
-
-        const gl = GLRenderer.gl;
-        
-        if(!GLVertexBuffer.Id.val) 
-        {
-            GLVertexBuffer.Id.val = gl.createBuffer();
-        };
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, GLVertexBuffer.Id.val);
-        gl.bufferData(gl.ARRAY_BUFFER, GLVertexBuffer.cachedVertexData, gl.STATIC_DRAW);
-        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        this.vbo = 0;
+        this.byteSize = 0;
     }
 
-    public PushLayoutToBuffer() : void 
+    public override create(props : VertexBufferProps) : void 
     {
-        GLVertexBuffer.cachedLayout.concat(this.uniqueLayout); 
+        this.byteSize = props.byteSize;
+
+        const id = gl.createBuffer();
+        if(id) 
+        {
+            this.vbo = id;
+        }
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
+        gl.bufferData(gl.ARRAY_BUFFER, props.data, gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, 0);
     }
-    
-    public static Id : Ref<WebGLBuffer | null> = {val: null}
-    public static cachedVertexData : Float32Array = new Float32Array();
-    public static cachedLayout : Array<BufferAttribLayout> = new Array<BufferAttribLayout>();
-    public static cachedSize : number = 0;
-    
-    public readonly nUniqueVertices : number;
-    public readonly uniqueLayout : BufferAttribLayout;
-    public readonly uniqueVertexData : Float32Array;
-    public readonly uniqueSize : number = 0
-    public readonly uniqueOffset : number = 0;
+
+    public override update(data: VertexData, byteOffset : number) : void 
+    {
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
+        gl.bufferSubData(gl.ARRAY_BUFFER, byteOffset, data);
+        gl.bindBuffer(gl.ARRAY_BUFFER, 0);
+    }
+
+    public override destroy() : void 
+    {
+        gl.deleteBuffer(this.vbo);
+        this.vbo = 0;
+    }   
+
+    public getContextHandle() : WebGLBuffer { return this.vbo; }
+    public getByteSize() : number { return this.byteSize; }
+
+    private vbo : WebGLBuffer;
+    private byteSize : number;
 };
 
 
 /**
- * @brief Sister class of a VertexBuffer to describe the indices for the VertexBuffer. 
- * Not necessary, but is recommended for meshes/models with a large number of vertices.
+ * @brief Constructs a GLIndexBuffer from vertices and a BufferLayout.
  */
-export class GLIndexBuffer   
+export class GLIndexBuffer extends IndexBuffer
 {
-    constructor(indices : Uint16Array | Uint32Array) 
+    constructor()
     {
-        this.uniqueIndices = indices;
-        this.uniqueOffset = GLIndexBuffer.cachedSize;
-        this.uniqueSize = this.uniqueIndices.length * 2; // 16 bits = 2 bytes.
-
-        var temp = new Uint16Array(GLIndexBuffer.cachedIndices.length + this.uniqueIndices.length);
-        temp.set(GLIndexBuffer.cachedIndices, 0);
-        temp.set(this.uniqueIndices, GLIndexBuffer.cachedIndices.length);
-
-        GLIndexBuffer.cachedIndices = temp;
-        GLIndexBuffer.cachedSize = GLIndexBuffer.cachedIndices.length * 2; // 16 bits = 2 bytes.
-        
-        const gl = GLRenderer.gl;
-
-        if(!GLIndexBuffer.Id.val) 
-        {
-            GLIndexBuffer.Id.val = gl.createBuffer();
-        };
-        
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, GLIndexBuffer.Id.val);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, GLIndexBuffer.cachedIndices, gl.STATIC_DRAW);
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+        super();
+        this.ebo = 0;
+        this.byteSize = 0;
     }
 
-    public static cachedIndices : Uint16Array = new Uint16Array();
-    public static cachedSize : number = 0;
-    public static Id : Ref<WebGLBuffer | null> = {val: null}
+    public override create(props : IndexBufferProps) : void 
+    {
+        this.byteSize = props.byteSize;
 
-    public readonly uniqueIndices : Uint16Array | Uint32Array;
-    public readonly uniqueOffset : number;
-    public readonly uniqueSize : number;
+        const id = gl.createBuffer();
+        if(id) 
+        {
+            this.ebo = id;
+        }
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.ebo);
+        gl.bufferData(gl.ARRAY_BUFFER, props.data, gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, 0);
+    }
+
+    public override update(data: VertexData, byteOffset : number) : void 
+    {
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.ebo);
+        gl.bufferSubData(gl.ARRAY_BUFFER, byteOffset, data);
+        gl.bindBuffer(gl.ARRAY_BUFFER, 0);
+    }
+
+    public override destroy() : void 
+    {
+        gl.deleteBuffer(this.ebo);
+        this.ebo = 0;
+    }   
+
+    public getContextHandle() : WebGLBuffer { return this.ebo; }
+    public getByteSize() : number { return this.byteSize; }
+
+    private ebo : WebGLBuffer;
+    private byteSize : number;
 };
+
+
+/**
+ * @brief Constructs a GLUnfiormBuffer from vertices and a BufferLayout.
+ */
+export class GLUniformBuffer extends UniformBuffer
+{
+    constructor()
+    {
+        super();
+
+        this.ubo = 0;
+        this.byteSize = 0;
+    }
+
+    public override create(props : IndexBufferProps) : void 
+    {
+        this.byteSize = props.byteSize;
+
+        const id = gl.createBuffer();
+        if(id) 
+        {
+            this.ubo = id;
+        }
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.ubo);
+        gl.bufferData(gl.ARRAY_BUFFER, props.data, gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, 0);
+    }
+
+    public override update(data: VertexData, byteOffset : number) : void 
+    {
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.ubo);
+        gl.bufferSubData(gl.ARRAY_BUFFER, byteOffset, data);
+        gl.bindBuffer(gl.ARRAY_BUFFER, 0);
+    }
+
+    public override destroy() : void 
+    {
+        gl.deleteBuffer(this.ubo);
+        this.ubo = 0;
+    }   
+
+    public getContextHandle() : WebGLBuffer { return this.ubo; }
+    public getByteSize() : number { return this.byteSize; }
+
+    private ubo : WebGLBuffer;
+    private byteSize : number;
+};
+

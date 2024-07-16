@@ -8,6 +8,6 @@
     "esModuleInterop": true,
     "allowUnusedLabels": true,
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "testbed/demo.ts"],
   "exclude": ["node_modules"]
 }

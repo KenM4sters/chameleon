@@ -1,157 +1,153 @@
-import { Ref } from "../../types";
-import { ITexture } from "../texture";
-import { GLRenderer } from "./gl_renderer";
+import { Sampler, Texture } from "../../graphics";
+import { Format, InternalFormat, TargetType, TextureProps, Usage, ValueType } from "../../types";
+import { g_glTargetTypes, gl } from "./gl_context";
+import { GLSampler } from "./gl_sampler";
 
-export interface GLTextureBlueprint 
+
+
+class GLTexture extends Texture 
 {
-    dimension : number;
-    format : number;  
-    width : number;
-    height : number;
-    nChannels : number;
-    type: number;
-    data : Float32Array | Uint8Array | Uint16Array | Uint32Array | null;
-    samplerInfo : GLTextureSamplerBlueprint
-};
-
-export interface GLTextureSamplerBlueprint 
-{
-    minFilter : number;
-    magFilter : number;
-    sWrap : number;
-    tWrap : number;
-    rWrap : number;
-};
-
-
-
-export abstract class GLTexture extends ITexture
-{
-    constructor(blueprint : GLTextureBlueprint) 
+    constructor() 
     {
         super();
 
-        this.blueprint = blueprint;
+        this.texture = 0;
+        this.rbo = 0;
 
-        this.gl = GLRenderer.gl;
+        this.target = TargetType.Texture2D;
+        this.format = Format.RGBA;
+        this.width = 0;
+        this.height = 0;
+        this.internalFormat = InternalFormat.RGBA32F;
+        this.type = ValueType.Float;
+        this.nMipMaps = 0;
+        this.level = 0;
+        this.usage = Usage.ReadWrite;
 
-        const texture = this.gl.createTexture();
+        this.isTex = true;
+        this.isCube = false;
+    }
 
-        if(!texture) 
+    public override create(props: TextureProps): void 
+    {
+        this.target = props.target;
+        this.format = props.format;
+        this.width = props.width;
+        this.height = props.height;
+        this.internalFormat = props.internalFormat;
+        this.type = props.type;
+        this.nMipMaps = props.nMipMaps;
+        this.level = props.level;
+        this.usage = props.usage;
+
+        this.sampler = props.sampler as GLSampler;
+
+        if(this.usage == Usage.WriteOnly) 
         {
-            throw new Error("Failed to create texture!");
+            const rbo = gl.createRenderbuffer();
+
+            if(!rbo) 
+            {
+                throw new Error("Failed to create render buffer object!");
+            }
+
+            this.rbo = rbo;
+
+            gl.bindRenderbuffer(gl.RENDERBUFFER, this.rbo);
+            gl.renderbufferStorage(gl.RENDERBUFFER, this.internalFormat, this.width, this.height);
+            gl.bindRenderbuffer(gl.RENDERBUFFER, 0);
+
+            this.isTex = false;
         }
+        else 
+        {
+            const texture = gl.createTexture();
+    
+            if(!texture)
+            {
+                throw new Error("Failed to create texture object!");
+            }
+    
+            this.texture = texture;
+    
+            gl.bindTexture(g_glTargetTypes[this.target], this.texture);
+            gl.bindSampler(g_glTargetTypes[this.target], this.sampler.getContextHandle());
+            
+            if(this.target == TargetType.TextureCube) 
+            {
+                for(let i = 0; i < 6; i++) 
+                {
+                    gl.texImage2D(g_glTargetTypes[this.target], this.level, this.internalFormat, this.width, this.height, this.format, 0, this.type, null);
+                }
 
-        this.id = {val: texture};
+                this.isCube = true;
+            }
+            else 
+            {
+                gl.texImage2D(g_glTargetTypes[this.target], this.level, this.internalFormat, this.width, this.height, this.format, 0, this.type, null);
+            }
+
+            if(this.nMipMaps > 0) 
+            {
+                gl.generateMipmap(g_glTargetTypes[this.target]);
+            }
+            
+            gl.bindTexture(g_glTargetTypes[this.target], 0);
+
+            this.isTex = true;
+        }
     }
 
-    public Destroy() : void
+    public override destroy(): void 
     {
-        this.gl.deleteTexture(this.id.val);
-    }
-
-    public readonly blueprint : GLTextureBlueprint;
-    public readonly id : Ref<WebGLTexture>;
-
-    protected gl : WebGL2RenderingContext;
-};
-
-
-export class GLTexture2D extends GLTexture
-{   
-    constructor(blueprint : GLTextureBlueprint) 
-    {
-        super(blueprint);
-
-        this.gl.bindTexture(this.blueprint.dimension, this.id.val);
-
-        this.gl.texParameteri(this.blueprint.dimension, this.gl.TEXTURE_MIN_FILTER, this.blueprint.samplerInfo.minFilter);
-        this.gl.texParameteri(this.blueprint.dimension, this.gl.TEXTURE_MAG_FILTER, this.blueprint.samplerInfo.magFilter);
-        this.gl.texParameteri(this.blueprint.dimension, this.gl.TEXTURE_WRAP_S, this.blueprint.samplerInfo.sWrap);
-        this.gl.texParameteri(this.blueprint.dimension, this.gl.TEXTURE_WRAP_T, this.blueprint.samplerInfo.tWrap);
-
-        this.gl.pixelStorei(this.gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, this.gl.NONE);
-        this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, true);
-
-        this.gl.texImage2D(this.blueprint.dimension, 0, this.blueprint.format, this.blueprint.width, this.blueprint.height, 0, this.blueprint.nChannels, this.blueprint.type, this.blueprint.data);
         
-        // Check for texture errors
-        if (this.gl.getError() !== this.gl.NO_ERROR) 
-        {
-            console.error("Error with texture binding or creation");
-        }
+    }
 
-        this.gl.bindTexture(this.blueprint.dimension, null);
+    public override resize(width: number, height: number): void 
+    {
+        
+    }
+
+
+    public getContextHandle() : WebGLTexture | WebGLRenderbuffer 
+    { 
+        return this.isTex ? this.texture : this.rbo;
     } 
+    
+    public isTexture() : boolean { return this.isTex; }
+    public isCubeTexture() : boolean { return this.isCube; }
+    public getWidth() : number { return this.width; }
+    public getHeight() : number { return this.height; }
+    public getInternalFormat() : InternalFormat { return this.internalFormat; }
+    public getFormat() : Format { return this.format; }
+    public getLevel() : number { return this.level; }
+    public getType() : ValueType { return this.type; }
+    public getTarget() : TargetType { return this.target; }
+    public getMipMapCount() : number { return this.height; }
+    public getUsage() : Usage { return this.usage; }
+    public getSampler() : GLSampler { return this.sampler; }
+    
 
-    public override Resize(width: number, height: number): void 
-    {
-        
-        this.gl.bindTexture(this.blueprint.dimension, this.id.val);
-        this.gl.texImage2D(this.blueprint.dimension, 0, this.blueprint.format, this.blueprint.width, this.blueprint.height, 0, this.blueprint.nChannels, this.blueprint.type, this.blueprint.data);
+    private texture : WebGLTexture;
+    private rbo : WebGLRenderbuffer;
 
-        // Check for texture errors
-        if (this.gl.getError() !== this.gl.NO_ERROR) 
-        {
-            console.error("Error with texture binding or creation");
-        }
-        
-        this.gl.bindTexture(this.blueprint.dimension, null);   
-    }
+    private target : TargetType;
+    private format : Format;
+    private width : number;
+    private height : number;
+    private internalFormat : InternalFormat;
+    private type : ValueType;
+    private nMipMaps : number;
+    private level : number;
+    private usage : Usage;
+    private sampler !: GLSampler;
+
+    private isTex : boolean;
+    private isCube : boolean;
 };
 
 
-
-
-
-export class GLTextureCube extends GLTexture 
+export 
 {
-    constructor(blueprint : GLTextureBlueprint) 
-    {
-        super(blueprint);
-
-        this.gl.bindTexture(this.blueprint.dimension, this.id.val);
-
-        this.gl.texParameteri(this.blueprint.dimension, this.gl.TEXTURE_MIN_FILTER, this.blueprint.samplerInfo.minFilter);
-        this.gl.texParameteri(this.blueprint.dimension, this.gl.TEXTURE_MAG_FILTER, this.blueprint.samplerInfo.magFilter);
-        this.gl.texParameteri(this.blueprint.dimension, this.gl.TEXTURE_WRAP_S, this.blueprint.samplerInfo.sWrap);
-        this.gl.texParameteri(this.blueprint.dimension, this.gl.TEXTURE_WRAP_T, this.blueprint.samplerInfo.tWrap);
-        this.gl.texParameteri(this.blueprint.dimension, this.gl.TEXTURE_WRAP_R, this.blueprint.samplerInfo.rWrap);
-
-        this.gl.pixelStorei(this.gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, this.gl.NONE);
-        
-        for(let i = 0; i < 6; i++) 
-        {
-            this.gl.texImage2D(this.gl.TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, this.blueprint.format, this.blueprint.width, this.blueprint.height, 0, this.blueprint.nChannels, this.blueprint.type, this.blueprint.data);
-
-            // Check for texture errors
-            if(this.gl.getError() !== this.gl.NO_ERROR) 
-            {
-                console.error("Error with texture binding or creation");
-            }
-        }
-        
-        this.gl.bindTexture(this.blueprint.dimension, null);
-    } 
-
-    public override Resize(width: number, height: number): void 
-    {
-        
-        this.blueprint.width = width;
-        this.blueprint.height = height;
-        
-        this.gl.bindTexture(this.gl.TEXTURE_CUBE_MAP, this.id.val);
-
-        for(let i = 0; i < 6; i++) 
-        {
-            this.gl.texImage2D(this.gl.TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, this.blueprint.format, this.blueprint.width, this.blueprint.height, 0, this.blueprint.nChannels, this.blueprint.type, this.blueprint.data);
-
-            // Check for texture errors
-            if(this.gl.getError() !== this.gl.NO_ERROR) 
-            {
-                console.error("Error with texture binding or creation");
-            }
-        }
-    }
+    GLTexture
 }
-
