@@ -1,6 +1,6 @@
-import { FrameBuffer } from "../../graphics";
-import { Attachment, FrameBufferAttachment, FrameBufferProps } from "../../types";
-import { g_glAttachments, gl } from "./gl_context";
+import { FrameBuffer } from "../common/context";
+import { FrameBufferAttachment, FrameBufferProps } from "../../graphics";
+import { g_glAttachments, g_glTargetTypes, gl } from "./gl_context";
 import { GLTexture } from "./gl_texture";
 
 
@@ -18,6 +18,9 @@ class GLFrameBuffer extends FrameBuffer
 
     public override create(props: FrameBufferProps): void 
     {
+
+        this.attachments = props.attachments;
+
         const fbo = gl.createFramebuffer();
 
         if(!fbo) 
@@ -31,17 +34,20 @@ class GLFrameBuffer extends FrameBuffer
 
         this.attachments.forEach((attachment : FrameBufferAttachment) => 
         {
-            const texture = attachment.texture as GLTexture;
+            const texture = attachment.texture as GLTexture;            
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, g_glAttachments[attachment.attachment], g_glTargetTypes[texture.getTarget()], texture.getContextHandle(), texture.getLevel());
 
-            if(texture.isTexture()) 
+            if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) 
             {
-                gl.framebufferTexture2D(gl.FRAMEBUFFER, g_glAttachments[attachment.attachment], texture.getTarget(), texture.getContextHandle() as WebGLTexture, texture.getLevel());
-            }
+                console.error("Framebuffer is not complete");
+            } 
             else 
             {
-                gl.framebufferRenderbuffer(gl.FRAMEBUFFER, g_glAttachments[attachment.attachment], texture.getTarget(), texture.getContextHandle() as WebGLRenderbuffer);
+                console.log("Framebuffer is complete");
             }
-        })
+        });
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }
 
     public override resize(width: number, height: number): void 
@@ -59,6 +65,8 @@ class GLFrameBuffer extends FrameBuffer
             attachment.texture.destroy();
         })
     }
+
+    public getContextHandle() : WebGLFramebuffer { return this.fbo; }
 
     private fbo : WebGLFramebuffer;
     private attachments : FrameBufferAttachment[];

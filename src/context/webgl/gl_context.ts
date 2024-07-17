@@ -1,11 +1,11 @@
 import { IGraphicsContext } from "../common/context";
-import { FrameBuffer, IndexBuffer, Program, Resource, Sampler, Shader, Texture, UniformBuffer, VertexBuffer, VertexInput } from "../../graphics";
-import { FrameBufferProps, GraphicsSettings, IndexBufferProps, ProgramProps, ResourceProps, SamplerFilterMode, SamplerProps, ShaderProps, TextureProps, UniformBufferProps, VertexBufferFlags, VertexBufferProps, VertexData, VertexInputProps } from "../../types";
+import { FrameBuffer, IndexBuffer, Program, Resource, Sampler, Shader, Texture, UniformBuffer, VertexBuffer, VertexInput } from "../common/context";
+import { FrameBufferProps, GraphicsSettings, IndexBufferProps, ProgramProps, SamplerProps, ShaderProps, TextureProps, TextureResourceProps, UniformBufferProps, UniformResourceProps, VertexBufferProps, VertexInputProps } from "../../graphics";
 import { GLIndexBuffer, GLUniformBuffer, GLVertexBuffer } from "./gl_buffer";
 import { GLProgram } from "./gl_program";
 import { GLShader } from "./gl_shader";
 import { GLVertexInput } from "./gl_vertex_input";
-import { GLResource, GLTextureResource, GLUniformResource } from "./gl_resource";
+import { GLTextureResource, GLUniformResource } from "./gl_resource";
 import { GLTexture } from "./gl_texture";
 import { GLSampler } from "./gl_sampler";
 import { GLFrameBuffer } from "./gl_framebuffer";
@@ -37,8 +37,22 @@ class GLGraphicsContext extends IGraphicsContext
     {
 
         canvas = settings.canvas;
+        canvas.width = settings.pixelViewportWidth;
+        canvas.height = settings.pixelViewportHeight;
 
         gl = canvas.getContext("webgl2") as WebGL2RenderingContext;
+
+        var ext1 = gl.getExtension('EXT_color_buffer_float');
+        if (!ext1) 
+        {
+            throw new Error('EXT_color_buffer_float is not supported')
+        };
+
+        var ext2 = gl.getExtension('OES_texture_float_linear');
+        if (!ext2) 
+        {
+            throw new Error('OES_texture_float_linear is not supported')
+        };
 
         g_glSamplerFilterModes = 
         [
@@ -158,21 +172,19 @@ class GLGraphicsContext extends IGraphicsContext
         return frameBuffer;
     }
 
-    public override createResource(props : ResourceProps) : Resource 
+    public override createTextureResource(props : TextureResourceProps) : Resource 
     {
-        if(props.type == "Sampler") 
-        {
-            let texture = new GLTextureResource();
-            texture.create(props);
-            return texture;
-        }
-        else 
-        {
-            let uniform = new GLUniformResource();
-            uniform.create(props);
-            return uniform;
-        }
-    }   
+        let textureResource = new GLTextureResource();
+        textureResource.create(props);
+        return textureResource;
+    }
+
+    public override createUniformResource(props : UniformResourceProps) : Resource 
+    {
+        let uniformResource = new GLUniformResource();
+        uniformResource.create(props);
+        return uniformResource;
+    } 
     
     public override createShader(props : ShaderProps) : Shader 
     {
@@ -190,14 +202,23 @@ class GLGraphicsContext extends IGraphicsContext
 
     public override begin(target : FrameBuffer | null) : void 
     {
-        gl.bindFramebuffer(gl.FRAMEBUFFER, target);
+        if(!target) 
+        {
+            gl.bindFramebuffer(gl.FRAMEBUFFER, target);
+        }
+        else 
+        {
+            const frameBuffer = target as GLFrameBuffer;
+            gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer.getContextHandle());
+        }
+
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.clearColor(0.1, 0.1, 0.1, 1.0);
     }
 
     public override end() : void 
     {
-
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }
 
     public override submit(vInput : VertexInput, shader : Shader) : void 
@@ -205,11 +226,11 @@ class GLGraphicsContext extends IGraphicsContext
         let glShader = shader as GLShader;
         let glInput = vInput as GLVertexInput;
 
-        gl.useProgram(glShader.getProgram().getContextHandle());
+        glShader.bind();
         gl.bindVertexArray(glInput.getContextHandle());
-        gl.drawElements(gl.TRIANGLES, 6, gl.INT, 0);
-        gl.useProgram(0);
-        gl.bindVertexArray(0);
+        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+        gl.useProgram(null);
+        gl.bindVertexArray(null);
     }
 }
 

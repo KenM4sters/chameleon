@@ -1,7 +1,5 @@
-import { IGraphicsContext } from "./context/common/context";
+import { FrameBuffer, IGraphicsContext, IndexBuffer, Program, Resource, Sampler, Shader, Texture, UniformBuffer, VertexBuffer, VertexInput } from "./context/common/context";
 import { GLGraphicsContext } from "./context/webgl/gl_context";
-import { Attribute, Format, FrameBufferAttachment, FrameBufferProps, GraphicsBackend, GraphicsSettings, IndexBufferProps, InternalFormat, ProgramProps, ResourceProps, ResourceType, SamplerAddressMode, SamplerFilterMode, SamplerProps, ShaderProps, TargetType, TextureProps, UniformBufferProps, ValueType, VertexBufferProps, VertexData, VertexInputProps, VertexLayout } from "./types";
-
 
 let s_ctx : IGraphicsContext = new GLGraphicsContext();
 
@@ -9,184 +7,20 @@ let s_ctx : IGraphicsContext = new GLGraphicsContext();
  * @brief Wrapper around any variable to ensure that it's passed by reference and not value.
  */ 
 
-class Ref<T> 
+export class Ref<T> 
 {
     constructor(public val : T) {};
 };
 
 
 /**
- * @brief
- */
-abstract class VertexBuffer 
-{   
-    public abstract create(props : VertexBufferProps) : void;
-
-    public abstract update(data: VertexData, byteOffset : number) : void;
-
-    public abstract destroy() : void;
-    
-    protected constructor() {};
-};
-
-
-/**
- * @brief
- */
-abstract class IndexBuffer 
-{
-    public abstract create(props : IndexBufferProps) : void;
-
-    public abstract update(data: VertexData, byteOffset : number) : void;
-
-    public abstract destroy() : void;
-    
-    protected constructor() {};
-};
-
-
-/**
- * @brief
- */
-abstract class UniformBuffer 
-{
-    public abstract create(props : UniformBufferProps) : void;
-
-    public abstract update(data: VertexData, byteOffset : number) : void;
-
-    public abstract destroy() : void;
-    
-    protected constructor() {};
-};
-
-
-/**
- * @brief Base class that each context provides a child class of that manages the creation
- * of a shader program from filePaths to the shader code.
- */
-abstract class Program 
-{
-    public abstract create(props : ProgramProps) : void;
-
-    public abstract destroy() : void;
-    
-    protected constructor() {};
-
-};
-
-
-/**
- * @brief Base class that each context provides a child of that manages the creation of a buffer 
- * on the GPU for texture data. 
- */
-abstract class Texture 
-{
-	public abstract create(props : TextureProps) : void;
-
-    public abstract resize(width : number, height : number) : void;
-
-    public abstract destroy() : void;
-    
-    protected constructor() {}
-
-};
-
-/**
- * @brief Base class that each context provides a child of that manages the creation of a sampler
- * object that can be used for many textures that each share the same sampling properties.
- */
-abstract class Sampler 
-{
-    public abstract create(props : SamplerProps) : void;
-
-    public abstract update(props : SamplerProps) : void;
-
-    public abstract detroy() : void;
-
-    protected constructor() {}
-
-};
-
-
-
-/**
- * @brief Base class that each context provides a child of that manages the creation of a FrameBuffer
- * used for rendering to offscreen buffers. 
- */
-abstract class FrameBuffer
-{
-    public abstract create(props : FrameBufferProps) : void;
-
-    public abstract resize(width : number, height : number) : void;
-
-    public abstract destroy() : void;
-    
-    protected constructor() {}
-
-
-};
-
-
-/**
- * @brief Base class that each context provides a child of that manages the creation of a Resource
- * which holds and manages data on the CPU that will be made visible to a shader program.
- * Generally speaking, this can be thought of as a wrapper for "uniforms", although it should
- * be noted that this also suppots images/samplers (which aren't labelled as uniforms in vulkan).
- */
-abstract class Resource 
-{
-    public abstract create(props : ResourceProps) : void
-
-    public abstract update(data : VertexData) : void
-
-    public abstract destroy() : void
-
-    public abstract  getName() : string; 
-
-    public abstract getType() : ResourceType; 
-    
-    protected constructor() {}
-};
-
-
-/**
- * @brief Base class that each context provides a child of that manages the creation of a large
- * wrapper around a program and a number of resources that are intended to be used with that 
- * program. 
- */
-abstract class Shader   
-{
-    public abstract create(props : ShaderProps) : void;
-
-    public abstract update(name : string, data : VertexData) : void;
-
-    public abstract destroy() : void;
-    
-    protected constructor() {}
-};
-
-
-/**
- * @brief Base class that each context provides a child of that manages that defines how 
- * vertex data should be interpreted (as well as providing the vertex and/or index data itself).
- */
-abstract class VertexInput 
-{
-    public abstract create(props: VertexInputProps) : void;
-
-    public abstract destroy() : void;
-    
-    protected constructor() {}
-};
-
-
-/**
+ *
  * @brief Initializes the rendering framework by setting the correct graphics context from
  * which all following context calls will be made to. 
  * @note This function MUST be called before any graphics-related functions, otherwise the 
  * context will considered as null and an error will be thrown.
  */
-function init(settings : GraphicsSettings) : void 
+export function init(settings : GraphicsSettings) : void 
 {
     switch(settings.backend) 
     {
@@ -206,7 +40,7 @@ function init(settings : GraphicsSettings) : void
  * member function should be called on each object before it goes out of scope, which cleans
  * up the context-related reources.
  */
-function shutdown() : void
+export function shutdown() : void
 {
     s_ctx.shutdown();
 }
@@ -221,7 +55,7 @@ function shutdown() : void
  * @return A smart pointer to the base VertexBuffer class which abstracts context-related
  * operations and offers a minimal interface for the user.
  */
-function createVertexBuffer(
+export function createVertexBuffer(
     props : VertexBufferProps
 ) : VertexBuffer
 {
@@ -238,7 +72,7 @@ function createVertexBuffer(
  * @return A smart pointer to the base IndexBuffer class which abstracts context-related
  * operations and offers a minimal interface for the user.
  */
-function createIndexBuffer(
+export function createIndexBuffer(
     props:             IndexBufferProps
 ) : IndexBuffer
 {
@@ -256,7 +90,7 @@ function createIndexBuffer(
  * @return A smart pointer to the base UniformBuffer class which abstracts context-related
  * operations and offers a minimal interface for the user.
  */
-function createUniformBuffer(
+export function createUniformBuffer(
     props:             UniformBufferProps, 
 ) : UniformBuffer
 {
@@ -274,7 +108,7 @@ function createUniformBuffer(
  * @return A smart pointer to the base Program class which abstracts context-related
  * operations and offers a minimal interface for the user.
  */
-function createProgram(
+export function createProgram(
     props:         ProgramProps,
 ) : Program
 {
@@ -297,7 +131,7 @@ function createProgram(
  * @return A smart pointer to the base Texture class which abstracts context-related
  * operations and offers a minimal interface for the user.
  */
-function createTexture(
+export function createTexture(
     props:             TextureProps,
 ) : Texture
 {
@@ -320,9 +154,9 @@ function createTexture(
  * @return A smart pointer to the base Program class which abstracts context-related
  * operations and offers a minimal interface for the user.
  */
-function createSampler(
+export function createSampler(
     props:         SamplerProps,
-) : Sampler 
+) : Sampler
 {
     return s_ctx.createSampler(props);
 }
@@ -336,7 +170,7 @@ function createSampler(
  * @return A smart pointer to the base FrameBuffer class which abstracts context-related
  * operations and offers a minimal interface for the user.
  */
-function createFrameBuffer(
+export function createFrameBuffer(
     props:          FrameBufferProps,
 ) : FrameBuffer
 {
@@ -348,16 +182,33 @@ function createFrameBuffer(
  * These should be constructed to hold and bind "uniform" data to Shader instances, with "uniform"
  * here meaning any of the types listed in @ref type.
  * @param name the name of the resource which will act as a key for a resource map that can be queried after construction (remember this).
- * @param type the type of the resource of which all available ones are listed in the ResourceType enum.
+ * @param type the type of the resource of which all available ones are listed in the UniformType enum.
  * @param memory the memory of the data that you wish to be made available to the shader program.
  * @return A smart pointer to the base Resource class which abstracts context-related
  * operations and offers a minimal interface for the user.
  */
-function createResource(
-    props:          ResourceProps
+export function createTextureResource(
+    props:          TextureResourceProps
 ) : Resource
 {
-    return s_ctx.createResource(props);
+    return s_ctx.createTextureResource(props);
+}
+
+/**
+ * @brief Creates a buffer on the GPU and fills it with the data passed in with @ref memory.
+ * These should be constructed to hold and bind "uniform" data to Shader instances, with "uniform"
+ * here meaning any of the types listed in @ref type.
+ * @param name the name of the resource which will act as a key for a resource map that can be queried after construction (remember this).
+ * @param type the type of the resource of which all available ones are listed in the UniformType enum.
+ * @param memory the memory of the data that you wish to be made available to the shader program.
+ * @return A smart pointer to the base Resource class which abstracts context-related
+ * operations and offers a minimal interface for the user.
+ */
+export function createUniformResource(
+    props:          UniformResourceProps
+) : Resource
+{
+    return s_ctx.createUniformResource(props);
 }
 
 /**
@@ -369,7 +220,7 @@ function createResource(
  * @return A smart pointer to the base Shader class which abstracts context-related
  * operations and offers a minimal interface for the user.
  */
-function createShader(
+export function createShader(
     props:          ShaderProps
 ) : Shader
 {
@@ -387,7 +238,7 @@ function createShader(
  * @return A smart pointer to the base VertexInput class which abstracts context-related
  * operations and offers a minimal interface for the user.
  */
-function createVertexInput(
+export function createVertexInput(
     props:          VertexInputProps,
 ) : VertexInput
 {
@@ -398,12 +249,19 @@ function createVertexInput(
 /**
  * @brief 
  */
-function begin(target : FrameBuffer | null) : void 
+export function begin(target : FrameBuffer | null) : void 
 {
     s_ctx.begin(target);
 }
 
 
+/**
+ * @brief
+ */
+export function end() : void 
+{
+    s_ctx.end();
+}
 
 /**
  * @brief Binds all appropriate resources and makes a draw command to the GPU. 
@@ -411,7 +269,7 @@ function begin(target : FrameBuffer | null) : void
  * @param shader the Shader instance that holds the Program and Resources to be used with the
  * the draw command.
  */
-function submit(
+export function submit(
     input:          VertexInput, 
     shader:         Shader
 ) : void
@@ -420,10 +278,475 @@ function submit(
 }
 
 
+export type VertexData = Float32Array | Uint16Array | Uint8Array; 
 
-export {
-    VertexBuffer, IndexBuffer, UniformBuffer, Sampler, Texture, Program,
-    FrameBuffer, Resource, Shader, VertexInput, createFrameBuffer, createVertexBuffer, createIndexBuffer, createProgram,
-    createResource, createVertexInput, createTexture, createUniformBuffer, createSampler, createShader, shutdown, 
-    submit, init, begin
+/**
+ * @brief An exhaustive list of the possible attributes. Names are important to match in DX12 
+ * so these type types act as indexes into an array of strings that correspond to the names=
+ * in shader
+ * 
+ * You should use these types regardless of the GraphicsBackend for consistency.
+ */
+export type Attribute =
+    "Position"
+    | "Normal"
+    | "Tangent"
+    | "BiTangent"
+    | "Weight"
+    | "Indices"
+    | "Color"
+    | "TexCoords"
+    | "Count";
+
+/**
+ * @brief
+ */
+export type UniformType =
+    "Sampler"
+    | "Float"
+    | "Int"
+    | "Vec2f"
+    | "Vec2i"
+    | "Vec3f"
+    | "Vec3i"
+    | "Vec4f"
+    | "Vec4i"
+    | "Mat4x4f"
+    | "Mat3x3f"
+    | "Count"
+
+
+/**
+ * @brief Rendering API of choice. Eventually this will cover OpenGL, Vulka, Metal and DX12,
+ * but for now only OpenGL and Vulkan are being supported.
+ */
+export enum GraphicsBackend
+{
+    WebGL,
+    WebGPU,
+    Count
+};
+
+
+/**
+ * @brief Specifies how the sampler will handle texture coordinates outside of the [0, 1]
+ * range.
+ */
+export enum SamplerAddressMode
+{
+    Repeat,                 ///< Wraps back around to [0, 1]
+    MirroredRepeat,         ///< Same as repeat, but reflects the texture.
+    ClampToEdge,            ///< Stretches the texture to the edge (ideal in most situations). 
+    Count
+};
+
+
+/**
+ * @brief Specifies how the sampler will handle texture coordinates that do not map directly
+ * to a texel, which can happen when the image has been scaled. 
+ */
+export enum SamplerFilterMode
+{
+    Nearest,                ///< Selects the closest texel (pixelated look).
+    Linear,                 ///< Linearly interpolates between relative texels (smooth look).
+    MipMapNearest,          ///< Selects the closest texel (pixelated look).
+    MipMapLinear,           ///< Linearly interpolates between relative texels (smooth look).
+    Count
+};
+
+
+
+
+/**
+ * @brief Targets dimensions for textures. 
+ */
+export enum TargetType
+{
+    Texture2D,
+    TextureCube,
+    Count
 }
+
+
+/**
+ * @brief Similar to @see {@link Format}, but also specifies the type of each component.
+ * Seeing as this framework support HDR rendering, you should almost always use the "F" variants
+ * to specifiy that they're floating point values and shouldn't be clamped during rendering.
+ */
+export enum InternalFormat
+{
+    R32,
+    R32F,
+    RG32,
+    RG32F,
+    RGB32,
+    RGB32F,
+    RGBA32,
+    RGBA32F,
+    Depth24Stencil8,
+    Count
+};
+
+
+/**
+ * @brief formats for buffers - specifies the number of channels per texel. 
+ */
+export enum Format
+{
+    RG,
+    RGB,
+    RGBA,
+    DepthStencil,
+    Count
+};
+
+
+/**
+ * @brief Specifies the different types of frame buffer attachments.
+ * @note Color0 represents the 1st color attachment.
+ */
+export enum Attachment
+{
+    Color0,
+    Color1,
+    Color2,
+    Color3,
+    Depth,
+    Stencil,
+    DepthStencil,
+    Count
+};
+
+
+/**
+ * @brief The possible types of a single value within the context of textures and attributes.
+ * Often it's important to know whether something is an array of floats, characters or integers.
+ */
+export enum ValueType
+{
+    UInt,
+    SInt,
+    UChar,
+    SChar,
+    Float,
+    Count
+};
+
+
+/**
+ * @brief 
+ */
+export enum Usage 
+{
+    ReadOnly,
+    WriteOnly,
+    ReadWrite
+};
+
+export enum WriteFrequency 
+{
+    Static,
+    Dynamic
+};
+
+export enum ResourceAccessType 
+{
+    PerFrame,
+    PerMaterial,
+    PerDrawCall
+}
+
+
+//============================================================================
+// Flags to explicity pass single bits of information which change the
+// context's behaviour.
+//============================================================================
+
+
+/**
+ * @brief 
+ */
+export enum TextureFlags
+{
+    ReadOnly = 0,
+    WriteOnly = 1 << 0,
+    ReadWrite = 1 << 1,
+    Color = 1 << 3,
+    Depth = 1 << 4,
+    Stencil = 1 << 5,
+};
+
+
+/**
+ * @brief 
+ */
+export enum VertexBufferFlags 
+{
+    Static = 0,
+    Dynamic = 1 << 0
+};
+
+
+/**
+ * @brief 
+ */
+export enum IndexBufferFlags 
+{
+    Static = 0,
+    Dynamic = 1 << 0
+};
+
+
+/**
+ * @brief
+ */
+export enum UniformBufferFlags 
+{
+    Static = 0,
+    Dynamic = 1 << 0
+};
+
+
+/**
+ * @brief
+ */
+export class VertexAttribute 
+{
+    constructor(attribute : Attribute, type : ValueType, count : number)
+    {
+        this.attribute = attribute;
+        this.type = type;
+        this.count = count;
+        this.byteOffset = 0;
+
+        switch(type) 
+        {
+            case ValueType.UInt: this.byteSize = count * 4; break;
+            case ValueType.SInt: this.byteSize = count * 4; break;
+            case ValueType.UChar: this.byteSize = count * 1; break;
+            case ValueType.SChar: this.byteSize = count * 1; break;
+            case ValueType.Float: this.byteSize = count * 4; break;
+            default: this.byteSize = count * 4; break;
+        }
+    }   
+    
+    attribute : Attribute;
+    type : ValueType;
+    count : number;
+    byteOffset : number;
+    byteSize : number;
+};
+
+
+/**
+ * @brief 
+ */
+export class VertexLayout 
+{
+    constructor(attributes : VertexAttribute[], count : number)
+    {
+        this.attributes = attributes;
+        this.count = count;
+        this.stride = 0;
+
+        for(let i = 0; i < count; i++) 
+        {
+            this.attributes[i].byteOffset = this.stride;
+            this.stride += attributes[i].byteSize;
+        }   
+    }
+
+    attributes : VertexAttribute[];
+    count : number;
+    stride : number;
+};
+
+
+//============================================================================
+// Helper structs to encapsulate variables that should only be used in 
+// conjunction width each other. These are left for the the user to create.
+//============================================================================
+
+
+/**
+ * @brief Encapsulates all the required info to create the graphics context behind Chameleon.
+ */
+export interface GraphicsSettings 
+{
+    canvas : HTMLCanvasElement;
+    backend : GraphicsBackend;
+    name : string;
+    pixelViewportWidth : number;
+    pixelViewportHeight : number;
+};
+
+
+/**
+ * @brief
+ */
+export interface TextureProps
+{
+    target : TargetType;
+    format : Format;
+    width : number;
+    height : number;
+    internalFormat : InternalFormat;
+    type : ValueType;
+    nMipMaps : number;
+    level : number;
+    usage : Usage;
+    sampler : Sampler;
+    data : ArrayBufferView | Float32Array | Uint16Array | null;
+};  
+
+
+/**
+ * @brief
+ */
+export interface SamplerProps 
+{
+    addressModeS : SamplerAddressMode;
+    addressModeT : SamplerAddressMode;
+    addressModeR : SamplerAddressMode;
+    minFilter : SamplerFilterMode;
+    magFilter : SamplerFilterMode;
+};
+
+
+/**
+ * @brief
+ */
+export interface VertexBufferProps 
+{
+    data : VertexData;
+    byteSize : number;
+};
+
+
+
+/**
+ * @brief
+ */
+export interface IndexBufferProps 
+{
+    data : VertexData;
+    byteSize : number;
+};
+
+
+
+/**
+ * @brief
+ */
+export interface UniformBufferProps 
+{
+    data : VertexData;
+    byteSize : number;
+};
+
+
+
+/**
+ * @brief
+ */
+export interface VertexLayoutProps 
+{
+    attributes : VertexAttribute[];
+    count : number;
+};
+
+
+
+/**
+ * @brief 
+ */
+export interface ProgramProps 
+{
+    vertCode : string;
+    fragCode : string;
+};
+
+
+
+export interface TextureResourceProps 
+{
+    name : string;
+    texture : Texture;
+    writeFrequency : WriteFrequency;
+    accessType : ResourceAccessType;
+}
+
+export interface UniformResourceProps 
+{
+    name : string;
+    type : UniformType;
+    data: number | string | VertexData;
+    writeFrequency : WriteFrequency;
+    accessType : ResourceAccessType;
+};
+ 
+
+/**
+ * @brief
+ */
+export interface VertexInputProps 
+{
+    vBuffer : VertexBuffer;
+    layout : VertexLayout;
+    iBuffer : IndexBuffer | null;
+};
+
+
+
+/**
+ * @brief
+ */
+export interface ShaderProps 
+{
+    program : Program;
+    resources : Resource[];
+    count : number;
+};
+
+
+
+
+/**
+ * @brief
+ */
+export interface FrameBufferProps 
+{
+    attachments : FrameBufferAttachment[];
+    count : number;
+};
+
+
+
+/**
+ * @brief
+ */
+export interface FrameBufferAttachment 
+{
+    texture : Texture;
+    attachment : Attachment;
+};
+
+
+/**
+ * @brief 
+ */
+export interface Extent 
+{
+    width : number;
+    height : number;
+};
+
+
+/**
+ * @brief 
+ */
+export interface Transform 
+{
+    pModel : number;
+    matrixCount : number;
+};

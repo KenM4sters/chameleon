@@ -1,6 +1,6 @@
-import { Sampler, Texture } from "../../graphics";
-import { Format, InternalFormat, TargetType, TextureProps, Usage, ValueType } from "../../types";
-import { g_glTargetTypes, gl } from "./gl_context";
+import { Texture } from "../common/context";
+import { Format, InternalFormat, TargetType, TextureProps, Usage, ValueType } from "../../graphics";
+import { g_glFormats, g_glInternalFormats, g_glTargetTypes, g_glValueTypes, gl } from "./gl_context";
 import { GLSampler } from "./gl_sampler";
 
 
@@ -12,8 +12,6 @@ class GLTexture extends Texture
         super();
 
         this.texture = 0;
-        this.rbo = 0;
-
         this.target = TargetType.Texture2D;
         this.format = Format.RGBA;
         this.width = 0;
@@ -23,8 +21,6 @@ class GLTexture extends Texture
         this.nMipMaps = 0;
         this.level = 0;
         this.usage = Usage.ReadWrite;
-
-        this.isTex = true;
         this.isCube = false;
     }
 
@@ -42,65 +38,45 @@ class GLTexture extends Texture
 
         this.sampler = props.sampler as GLSampler;
 
-        if(this.usage == Usage.WriteOnly) 
-        {
-            const rbo = gl.createRenderbuffer();
+        const texture = gl.createTexture();
 
-            if(!rbo) 
+        if(!texture)
+        {
+            throw new Error("Failed to create texture object!");
+        }
+
+        this.texture = texture;
+
+        gl.bindTexture(g_glTargetTypes[this.target], this.texture);
+        gl.bindSampler(0, this.sampler.getContextHandle());
+        
+        if(this.target == TargetType.TextureCube) 
+        {
+            for(let i = 0; i < 6; i++) 
             {
-                throw new Error("Failed to create render buffer object!");
+                gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X + i, this.level, g_glInternalFormats[this.internalFormat], this.width, this.height, 0, g_glFormats[this.format], g_glValueTypes[this.type], null);
             }
 
-            this.rbo = rbo;
-
-            gl.bindRenderbuffer(gl.RENDERBUFFER, this.rbo);
-            gl.renderbufferStorage(gl.RENDERBUFFER, this.internalFormat, this.width, this.height);
-            gl.bindRenderbuffer(gl.RENDERBUFFER, 0);
-
-            this.isTex = false;
+            this.isCube = true;
         }
         else 
-        {
-            const texture = gl.createTexture();
-    
-            if(!texture)
-            {
-                throw new Error("Failed to create texture object!");
-            }
-    
-            this.texture = texture;
-    
-            gl.bindTexture(g_glTargetTypes[this.target], this.texture);
-            gl.bindSampler(g_glTargetTypes[this.target], this.sampler.getContextHandle());
-            
-            if(this.target == TargetType.TextureCube) 
-            {
-                for(let i = 0; i < 6; i++) 
-                {
-                    gl.texImage2D(g_glTargetTypes[this.target], this.level, this.internalFormat, this.width, this.height, this.format, 0, this.type, null);
-                }
-
-                this.isCube = true;
-            }
-            else 
-            {
-                gl.texImage2D(g_glTargetTypes[this.target], this.level, this.internalFormat, this.width, this.height, this.format, 0, this.type, null);
-            }
-
-            if(this.nMipMaps > 0) 
-            {
-                gl.generateMipmap(g_glTargetTypes[this.target]);
-            }
-            
-            gl.bindTexture(g_glTargetTypes[this.target], 0);
-
-            this.isTex = true;
+        {               
+            gl.texImage2D(g_glTargetTypes[this.target], this.level, g_glInternalFormats[this.internalFormat], this.width, this.height, 0, g_glFormats[this.format], g_glValueTypes[this.type], null);
+            // gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, 512, 512, 0, gl.RGBA, gl.FLOAT, null);
         }
+
+        if(this.nMipMaps > 0) 
+        {
+            gl.generateMipmap(g_glTargetTypes[this.target]);
+        }
+        
+        gl.bindTexture(g_glTargetTypes[this.target], null);
     }
 
     public override destroy(): void 
     {
-        
+        gl.bindTexture(g_glTargetTypes[this.target], null);
+        gl.deleteTexture(this.texture);
     }
 
     public override resize(width: number, height: number): void 
@@ -108,13 +84,11 @@ class GLTexture extends Texture
         
     }
 
-
-    public getContextHandle() : WebGLTexture | WebGLRenderbuffer 
+    public getContextHandle() : WebGLTexture 
     { 
-        return this.isTex ? this.texture : this.rbo;
+        return this.texture;
     } 
     
-    public isTexture() : boolean { return this.isTex; }
     public isCubeTexture() : boolean { return this.isCube; }
     public getWidth() : number { return this.width; }
     public getHeight() : number { return this.height; }
@@ -129,8 +103,6 @@ class GLTexture extends Texture
     
 
     private texture : WebGLTexture;
-    private rbo : WebGLRenderbuffer;
-
     private target : TargetType;
     private format : Format;
     private width : number;
@@ -142,7 +114,6 @@ class GLTexture extends Texture
     private usage : Usage;
     private sampler !: GLSampler;
 
-    private isTex : boolean;
     private isCube : boolean;
 };
 

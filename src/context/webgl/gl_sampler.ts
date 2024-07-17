@@ -1,5 +1,5 @@
-import { Sampler } from "../../graphics";
-import { SamplerAddressMode, SamplerFilterMode, SamplerProps } from "../../types";
+import { Sampler } from "../common/context";
+import { SamplerAddressMode, SamplerFilterMode, SamplerProps } from "../../graphics";
 import { g_glSamplerAddressModes, g_glSamplerFilterModes, gl } from "./gl_context";
 
 
@@ -37,7 +37,7 @@ class GLSampler extends Sampler
 
         this.sampler = id;
 
-        gl.bindSampler(gl.TEXTURE_2D, this.sampler);
+        gl.bindSampler(0, this.sampler);
 
         gl.samplerParameteri(this.sampler, gl.TEXTURE_WRAP_S, g_glSamplerAddressModes[this.addressModeS]);
         gl.samplerParameteri(this.sampler, gl.TEXTURE_WRAP_T, g_glSamplerAddressModes[this.addressModeT]);
@@ -45,7 +45,7 @@ class GLSampler extends Sampler
         gl.samplerParameteri(this.sampler, gl.TEXTURE_MIN_FILTER, g_glSamplerFilterModes[this.minFilter]);
         gl.samplerParameteri(this.sampler, gl.TEXTURE_MAG_FILTER, g_glSamplerFilterModes[this.magFilter]);
 
-        gl.bindSampler(gl.TEXTURE_2D, 0);
+        gl.bindSampler(0, null);
     }
 
     public override update(props: SamplerProps): void 
@@ -64,12 +64,12 @@ class GLSampler extends Sampler
         gl.samplerParameteri(this.sampler, gl.TEXTURE_MIN_FILTER, g_glSamplerFilterModes[this.minFilter]);
         gl.samplerParameteri(this.sampler, gl.TEXTURE_MAG_FILTER, g_glSamplerFilterModes[this.magFilter]);
         
-        gl.bindSampler(gl.TEXTURE_2D, 0);  
+        gl.bindSampler(gl.TEXTURE_2D, null);  
     }
 
     public override detroy(): void 
     {
-        gl.bindSampler(gl.TEXTURE_2D, 0);
+        gl.bindSampler(gl.TEXTURE_2D, null);
         gl.deleteSampler(this.sampler);
     }
 

@@ -1,9 +1,167 @@
-import { FrameBuffer, IndexBuffer, Program, Resource, Sampler, Shader, Texture, UniformBuffer, VertexBuffer, VertexInput } from "../../graphics";
-import { FrameBufferProps, GraphicsSettings, IndexBufferProps, ProgramProps, ResourceProps, SamplerProps, ShaderProps, TextureProps, UniformBufferProps, VertexBufferFlags, VertexBufferProps, VertexData, VertexInputProps } from "../../types";
+import { FrameBufferProps, GraphicsSettings, IndexBufferProps, ProgramProps, SamplerProps, ShaderProps, TextureProps, TextureResourceProps, UniformBufferProps, UniformResourceProps, VertexBufferProps, VertexData, VertexInputProps } from "../../graphics";
+
+
+/**
+ * @brief
+ */
+export abstract class VertexBuffer 
+{   
+    public abstract create(props : VertexBufferProps) : void;
+
+    public abstract update(data: VertexData, byteOffset : number) : void;
+
+    public abstract destroy() : void;
+    
+    protected constructor() {};
+};
+
+
+/**
+ * @brief
+ */
+export abstract class IndexBuffer 
+{
+    public abstract create(props : IndexBufferProps) : void;
+
+    public abstract update(data: VertexData, byteOffset : number) : void;
+
+    public abstract destroy() : void;
+    
+    protected constructor() {};
+};
+
+
+/**
+ * @brief
+ */
+export abstract class UniformBuffer 
+{
+    public abstract create(props : UniformBufferProps) : void;
+
+    public abstract update(data: VertexData, byteOffset : number) : void;
+
+    public abstract destroy() : void;
+    
+    protected constructor() {};
+};
+
+
+/**
+ * @brief Base class that each context provides a child class of that manages the creation
+ * of a shader program from filePaths to the shader code.
+ */
+export abstract class Program 
+{
+    public abstract create(props : ProgramProps) : void;
+
+    public abstract destroy() : void;
+    
+    protected constructor() {};
+
+};
+
+
+/**
+ * @brief Base class that each context provides a child of that manages the creation of a buffer 
+ * on the GPU for texture data. 
+ */
+export abstract class Texture 
+{
+	public abstract create(props : TextureProps) : void;
+
+    public abstract resize(width : number, height : number) : void;
+
+    public abstract destroy() : void;
+    
+    protected constructor() {}
+
+};
+
+/**
+ * @brief Base class that each context provides a child of that manages the creation of a sampler
+ * object that can be used for many textures that each share the same sampling properties.
+ */
+export abstract class Sampler 
+{
+    public abstract create(props : SamplerProps) : void;
+
+    public abstract update(props : SamplerProps) : void;
+
+    public abstract detroy() : void;
+
+    protected constructor() {}
+
+};
 
 
 
-abstract class IGraphicsContext 
+/**
+ * @brief Base class that each context provides a child of that manages the creation of a FrameBuffer
+ * used for rendering to offscreen buffers. 
+ */
+export abstract class FrameBuffer
+{
+    public abstract create(props : FrameBufferProps) : void;
+
+    public abstract resize(width : number, height : number) : void;
+
+    public abstract destroy() : void;
+    
+    protected constructor() {}
+
+
+};
+
+
+/**
+ * @brief Base class that each context provides a child of that manages the creation of a Resource
+ * which holds and manages data on the CPU that will be made visible to a shader program.
+ * Generally speaking, this can be thought of as a wrapper for "uniforms", although it should
+ * be noted that this also suppots images/samplers (which aren't labelled as uniforms in vulkan).
+ */
+export abstract class Resource 
+{
+    public abstract destroy() : void
+
+    public abstract  getName() : string; 
+    
+    protected constructor() {}
+};
+
+
+/**
+ * @brief Base class that each context provides a child of that manages the creation of a large
+ * wrapper around a program and a number of resources that are intended to be used with that 
+ * program. 
+ */
+export abstract class Shader   
+{
+    public abstract create(props : ShaderProps) : void;
+
+    public abstract update(name : string, data : VertexData) : void;
+
+    public abstract bind() : void;
+
+    public abstract destroy() : void;
+    
+    protected constructor() {}
+};
+
+
+/**
+ * @brief Base class that each context provides a child of that manages that defines how 
+ * vertex data should be interpreted (as well as providing the vertex and/or index data itself).
+ */
+export abstract class VertexInput 
+{
+    public abstract create(props: VertexInputProps) : void;
+
+    public abstract destroy() : void;
+    
+    protected constructor() {}
+};
+
+export abstract class IGraphicsContext 
 {
     constructor() {}
 
@@ -25,7 +183,9 @@ abstract class IGraphicsContext
 
     public abstract createFrameBuffer(props : FrameBufferProps) : FrameBuffer;
 
-    public abstract createResource(props : ResourceProps) : Resource;
+    public abstract createTextureResource(props : TextureResourceProps) : Resource;
+
+    public abstract createUniformResource(props : UniformResourceProps) : Resource;
     
     public abstract createShader(props : ShaderProps) : Shader;
     
@@ -39,4 +199,3 @@ abstract class IGraphicsContext
 };
 
 
-export { IGraphicsContext }

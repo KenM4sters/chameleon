@@ -1,5 +1,5 @@
-import { Program } from "../../graphics";
-import { ProgramProps } from "../../types";
+import { Program } from "../common/context";
+import { ProgramProps } from "../../graphics";
 import { gl } from "./gl_context";
 
 
@@ -60,6 +60,7 @@ export class GLProgram extends Program
             throw new Error("Failed to create shader program!")
         }
 
+        this.program = id;
 
         gl.attachShader(this.program, vShader);
         gl.attachShader(this.program, fShader);
@@ -76,6 +77,7 @@ export class GLProgram extends Program
 
     public override destroy() : void 
     {
+        gl.useProgram(null);
         gl.deleteProgram(this.program);
         this.program = 0;
     }

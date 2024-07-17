@@ -1,20 +1,21 @@
-import { Resource, Texture, UniformBuffer } from "../../graphics";
-import { ResourceProps, ResourceType, VertexData } from "../../types";
+import { Resource, Texture } from "../common/context";
+import { ResourceAccessType, TextureResourceProps, UniformResourceProps, UniformType, VertexData, WriteFrequency } from "../../graphics";
 
 
-abstract class GLResource extends Resource 
+export abstract class GLResource extends Resource 
 {
     constructor() 
     {
         super();
     }
 
-    public abstract create(props: ResourceProps): void;
-
     public abstract destroy(): void;
+    public abstract getType() : UniformType;
+    public abstract getAccessType() : ResourceAccessType;
+    public abstract getWriteFrequency() : WriteFrequency;
 }
 
-class GLUniformResource extends GLResource 
+export class GLUniformResource extends GLResource 
 {
     constructor()
     {
@@ -22,11 +23,18 @@ class GLUniformResource extends GLResource
 
         this.name = "default_uniform";
         this.type = "Float";
+        this.writeFrequency = WriteFrequency.Dynamic;
+        this.accessType = ResourceAccessType.PerDrawCall;
+        this.data = 0;
     }
 
-    public override create(props: ResourceProps): void 
+    public create(props: UniformResourceProps): void 
     {
-        
+        this.name = props.name;
+        this.type = props.type;
+        this.writeFrequency = WriteFrequency.Dynamic;
+        this.accessType = ResourceAccessType.PerDrawCall;
+        this.data = props.data;
     }
 
     public override destroy(): void 
@@ -34,22 +42,26 @@ class GLUniformResource extends GLResource
         
     }
 
-    public override update(data: VertexData): void 
+    public update(data: VertexData): void 
     {
-        
+        this.data = data;
     }
 
     public override getName() : string { return this.name; } 
-    public override getType() : ResourceType { return this.type; } 
-    public getBuffer() : UniformBuffer { return this.uniformBuffer; }
-
+    public override getType() : UniformType {return this.type; }
+    public override getAccessType() : ResourceAccessType { return this.accessType}
+    public override getWriteFrequency() : WriteFrequency { return this.writeFrequency}
+    public getData() : number | string | VertexData { return this.data; }
+    
     private name : string;
-    private type : ResourceType;
-    private uniformBuffer !: UniformBuffer;
+    private type : UniformType;
+    private writeFrequency : WriteFrequency;
+    private accessType : ResourceAccessType;
+    private data : number | string | VertexData;
 }
 
 
-class GLTextureResource extends GLResource 
+export class GLTextureResource extends GLResource 
 {
     constructor()
     {
@@ -57,11 +69,16 @@ class GLTextureResource extends GLResource
 
         this.name = "default_texture";
         this.type = "Sampler";
+        this.writeFrequency = WriteFrequency.Dynamic;
+        this.accessType = ResourceAccessType.PerDrawCall;
     }
 
-    public override create(props: ResourceProps): void 
+    public create(props: TextureResourceProps): void 
     {
-        
+        this.name = props.name;
+        this.writeFrequency = WriteFrequency.Dynamic;
+        this.accessType = ResourceAccessType.PerDrawCall;
+        this.texture = props.texture;
     }
 
     public override destroy(): void 
@@ -69,19 +86,21 @@ class GLTextureResource extends GLResource
         
     }
 
-    public override update(data: VertexData): void 
+    public update(data: VertexData): void 
     {
         
     }
 
     public override getName() : string { return this.name; } 
-    public override getType() : ResourceType { return this.type; } 
-    public getBuffer() : Texture { return this.texture; }
+    public override getType() : UniformType {return this.type; }
+    public override getAccessType() : ResourceAccessType { return this.accessType}
+    public override getWriteFrequency() : WriteFrequency { return this.writeFrequency}
+    public getTexture() : Texture { return this.texture; }
 
     private name : string;
-    private type : ResourceType;
+    private type : UniformType;
+    private writeFrequency : WriteFrequency;
+    private accessType : ResourceAccessType;
     private texture !: Texture;
 }
 
-
-export {GLResource, GLUniformResource, GLTextureResource}

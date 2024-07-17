@@ -1,5 +1,5 @@
-import { IndexBuffer, UniformBuffer, VertexBuffer } from "../../graphics";
-import { IndexBufferProps, VertexBufferProps, VertexData } from "../../types";
+import { IndexBufferProps, UniformBufferProps, VertexBufferProps, VertexData } from "../../graphics";
+import { IndexBuffer, UniformBuffer, VertexBuffer } from "../common/context";
 import { gl } from "./gl_context";
 
 
@@ -21,25 +21,29 @@ export class GLVertexBuffer extends VertexBuffer
         this.byteSize = props.byteSize;
 
         const id = gl.createBuffer();
-        if(id) 
-        {
-            this.vbo = id;
-        }
 
+        if(!id) 
+        {
+            throw new Error("Failed to create vertex buffer!");
+        }
+        
+        this.vbo = id;
+        
         gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
         gl.bufferData(gl.ARRAY_BUFFER, props.data, gl.STATIC_DRAW);
-        gl.bindBuffer(gl.ARRAY_BUFFER, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
     }
 
     public override update(data: VertexData, byteOffset : number) : void 
     {
         gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
         gl.bufferSubData(gl.ARRAY_BUFFER, byteOffset, data);
-        gl.bindBuffer(gl.ARRAY_BUFFER, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
     }
 
     public override destroy() : void 
     {
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
         gl.deleteBuffer(this.vbo);
         this.vbo = 0;
     }   
@@ -69,25 +73,29 @@ export class GLIndexBuffer extends IndexBuffer
         this.byteSize = props.byteSize;
 
         const id = gl.createBuffer();
-        if(id) 
-        {
-            this.ebo = id;
-        }
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.ebo);
-        gl.bufferData(gl.ARRAY_BUFFER, props.data, gl.STATIC_DRAW);
-        gl.bindBuffer(gl.ARRAY_BUFFER, 0);
+        if(!id) 
+        {
+            throw new Error("Failed to create index buffer!");
+        }
+        
+        this.ebo = id;
+
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ebo);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, props.data, gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
     }
 
     public override update(data: VertexData, byteOffset : number) : void 
     {
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.ebo);
-        gl.bufferSubData(gl.ARRAY_BUFFER, byteOffset, data);
-        gl.bindBuffer(gl.ARRAY_BUFFER, 0);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ebo);
+        gl.bufferSubData(gl.ELEMENT_ARRAY_BUFFER, byteOffset, data);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
     }
 
     public override destroy() : void 
     {
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
         gl.deleteBuffer(this.ebo);
         this.ebo = 0;
     }   
@@ -113,30 +121,34 @@ export class GLUniformBuffer extends UniformBuffer
         this.byteSize = 0;
     }
 
-    public override create(props : IndexBufferProps) : void 
+    public override create(props : UniformBufferProps) : void 
     {
         this.byteSize = props.byteSize;
 
         const id = gl.createBuffer();
-        if(id) 
-        {
-            this.ubo = id;
-        }
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.ubo);
-        gl.bufferData(gl.ARRAY_BUFFER, props.data, gl.STATIC_DRAW);
-        gl.bindBuffer(gl.ARRAY_BUFFER, 0);
+        if(!id) 
+        {
+            throw new Error("Failed to create uniform buffer!");
+        }
+            
+        this.ubo = id;
+
+        gl.bindBuffer(gl.UNIFORM_BUFFER, this.ubo);
+        gl.bufferData(gl.UNIFORM_BUFFER, props.data, gl.STATIC_DRAW);
+        gl.bindBuffer(gl.UNIFORM_BUFFER, null);
     }
 
     public override update(data: VertexData, byteOffset : number) : void 
     {
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.ubo);
-        gl.bufferSubData(gl.ARRAY_BUFFER, byteOffset, data);
-        gl.bindBuffer(gl.ARRAY_BUFFER, 0);
+        gl.bindBuffer(gl.UNIFORM_BUFFER, this.ubo);
+        gl.bufferSubData(gl.UNIFORM_BUFFER, byteOffset, data);
+        gl.bindBuffer(gl.UNIFORM_BUFFER, null);
     }
 
     public override destroy() : void 
     {
+        gl.bindBuffer(gl.UNIFORM_BUFFER, null);
         gl.deleteBuffer(this.ubo);
         this.ubo = 0;
     }   

@@ -1,5 +1,5 @@
-import { VertexInput } from "../../graphics";
-import { VertexAttribute, VertexInputProps, VertexLayout } from "../../types";
+import { VertexInput } from "../common/context";
+import { VertexAttribute, VertexInputProps, VertexLayout } from "../../graphics";
 import { GLIndexBuffer, GLVertexBuffer } from "./gl_buffer";
 import { gl } from "./gl_context";
 
@@ -34,7 +34,6 @@ export class GLVertexInput extends VertexInput
 
         const id = gl.createVertexArray();
 
-
         if(!id) 
         {
             throw new Error("Failed to create vertex array object!");
@@ -43,8 +42,8 @@ export class GLVertexInput extends VertexInput
         this.vao = id;
 
         gl.bindVertexArray(this.vao);
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
 
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer.getContextHandle());
         if(this.indexBuffer) 
         {
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer.getContextHandle());

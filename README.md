@@ -6,6 +6,9 @@ Chameleon is an api-agnostic framework for the web, supprting both webgl and web
 ## Code snippet
 ```
 
+import * as cml from "../src/chameleon"
+
+
 let squareVertices : number[] = 
 [
     -0.5, -0.5,
@@ -25,7 +28,7 @@ export function RunDemo()
 {
     let settings : cml.GraphicsSettings = 
     {
-        canvas: document.createElement("canvas") as HTMLCanvasElement,
+        canvas: document.getElementById("webgl") as HTMLCanvasElement,
         name: "demo",
         backend: cml.GraphicsBackend.WebGL,
         pixelViewportWidth: window.innerWidth,
@@ -35,8 +38,7 @@ export function RunDemo()
     cml.init(settings);
 
     let vertexShader : string = 
-    `
-        #verions 330 es
+    `   #version 300 es
         in vec3 a_position;
 
         void main() 
@@ -47,7 +49,7 @@ export function RunDemo()
     `;
 
     let fragmentShader : string = 
-    `
+    `   #version 300 es
         precision highp float;
 
         out vec4 frag_color;
@@ -63,7 +65,7 @@ export function RunDemo()
     let indexBuffer = cml.createIndexBuffer({data: new Uint16Array(squareIndices), byteSize: squareIndices.length * 4});
 
     let layout = new cml.VertexLayout(
-        [new cml.VertexAttribute("Position", cml.ValueType.Float, 3)], 1
+        [new cml.VertexAttribute("Position", cml.ValueType.Float, 2)], 1
     );
 
     let input = cml.createVertexInput(
@@ -78,12 +80,26 @@ export function RunDemo()
 
     let shader = cml.createShader({program: program, resources: [uTest], count: 1});
 
-    window.requestAnimationFrame(() => 
-    {
-        cml.begin(null);
+    loop();
 
-        cml.submit(input, shader);
-    })  
+    
+    function loop() : void 
+    {
+        window.requestAnimationFrame(() => 
+        {
+            cml.begin(null);        
+            
+            cml.submit(input, shader);
+            
+            loop();
+        });  
+    }
+        
+    window.addEventListener("close", () => 
+    {
+        shader.destroy();
+        input.destroy();
+    })
 }
 
 ```
