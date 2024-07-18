@@ -5,7 +5,7 @@ import { GLSampler } from "./gl_sampler";
 
 
 
-class GLTexture extends Texture 
+export class GLTexture extends Texture
 {
     constructor() 
     {
@@ -113,12 +113,5 @@ class GLTexture extends Texture
     private level : number;
     private usage : Usage;
     private sampler !: GLSampler;
-
     private isCube : boolean;
 };
-
-
-export 
-{
-    GLTexture
-}

@@ -1,4 +1,4 @@
-import { FrameBufferProps, GraphicsSettings, IndexBufferProps, ProgramProps, SamplerProps, ShaderProps, TextureProps, TextureResourceProps, UniformBufferProps, UniformResourceProps, VertexBufferProps, VertexData, VertexInputProps } from "../../graphics";
+import { FrameBufferProps, GraphicsSettings, IndexBufferProps, ProgramProps, SamplerProps, ShaderProps, TextureProps, TextureResourceProps, UniformBufferProps, UniformResourceProps, ResourceType, VertexBufferProps, VertexData, VertexInputProps, ResourceAccessType, WriteFrequency } from "../../graphics";
 
 
 /**
@@ -123,9 +123,67 @@ export abstract class Resource
 {
     public abstract destroy() : void
 
-    public abstract  getName() : string; 
+    public abstract getName() : string; 
+
+    public abstract getType() : ResourceType;
+
+    public abstract getAccessType() : ResourceAccessType;
+
+    public abstract getWriteFrequency() : WriteFrequency;
     
     protected constructor() {}
+};
+
+/**
+ * @brief Base class that each context provides a child of that manages the creation of a Resource
+ * which holds and manages data on the CPU that will be made visible to a shader program.
+ * Generally speaking, this can be thought of as a wrapper for "uniforms", although it should
+ * be noted that this also suppots images/samplers (which aren't labelled as uniforms in vulkan).
+ */
+export abstract class UniformResource extends Resource
+{
+    public abstract destroy() : void
+
+    public abstract getName() : string; 
+
+    public abstract getType() : ResourceType;
+
+    public abstract getAccessType() : ResourceAccessType;
+
+    public abstract getWriteFrequency() : WriteFrequency;
+
+    public abstract update(data : number | string | VertexData) : void;
+    
+    protected constructor() 
+    {
+        super();
+    }
+};
+
+/**
+ * @brief Base class that each context provides a child of that manages the creation of a Resource
+ * which holds and manages data on the CPU that will be made visible to a shader program.
+ * Generally speaking, this can be thought of as a wrapper for "uniforms", although it should
+ * be noted that this also suppots images/samplers (which aren't labelled as uniforms in vulkan).
+ */
+export abstract class SamplerResource extends Resource
+{
+    public abstract destroy() : void
+
+    public abstract getName() : string; 
+
+    public abstract getType() : ResourceType;
+
+    public abstract getAccessType() : ResourceAccessType;
+
+    public abstract getWriteFrequency() : WriteFrequency;
+
+    public abstract update(texture : Texture) : void;
+    
+    protected constructor() 
+    {
+        super();
+    }
 };
 
 
@@ -137,8 +195,6 @@ export abstract class Resource
 export abstract class Shader   
 {
     public abstract create(props : ShaderProps) : void;
-
-    public abstract update(name : string, data : VertexData) : void;
 
     public abstract bind() : void;
 
@@ -183,9 +239,9 @@ export abstract class IGraphicsContext
 
     public abstract createFrameBuffer(props : FrameBufferProps) : FrameBuffer;
 
-    public abstract createTextureResource(props : TextureResourceProps) : Resource;
+    public abstract createSamplerResource(props : TextureResourceProps) : SamplerResource;
 
-    public abstract createUniformResource(props : UniformResourceProps) : Resource;
+    public abstract createUniformResource(props : UniformResourceProps) : UniformResource;
     
     public abstract createShader(props : ShaderProps) : Shader;
     

@@ -1,21 +1,8 @@
-import { Resource, Texture } from "../common/context";
-import { ResourceAccessType, TextureResourceProps, UniformResourceProps, UniformType, VertexData, WriteFrequency } from "../../graphics";
+import { SamplerResource, Texture, UniformResource } from "../common/context";
+import { ResourceAccessType, ResourceType, TextureResourceProps, UniformResourceProps, VertexData, WriteFrequency } from "../../graphics";
 
 
-export abstract class GLResource extends Resource 
-{
-    constructor() 
-    {
-        super();
-    }
-
-    public abstract destroy(): void;
-    public abstract getType() : UniformType;
-    public abstract getAccessType() : ResourceAccessType;
-    public abstract getWriteFrequency() : WriteFrequency;
-}
-
-export class GLUniformResource extends GLResource 
+export class GLUniformResource extends UniformResource 
 {
     constructor()
     {
@@ -42,26 +29,26 @@ export class GLUniformResource extends GLResource
         
     }
 
-    public update(data: VertexData): void 
+    public update(data: number | string | VertexData): void 
     {
         this.data = data;
     }
 
     public override getName() : string { return this.name; } 
-    public override getType() : UniformType {return this.type; }
+    public override getType() : ResourceType {return this.type; }
     public override getAccessType() : ResourceAccessType { return this.accessType}
     public override getWriteFrequency() : WriteFrequency { return this.writeFrequency}
     public getData() : number | string | VertexData { return this.data; }
     
     private name : string;
-    private type : UniformType;
+    private type : ResourceType;
     private writeFrequency : WriteFrequency;
     private accessType : ResourceAccessType;
     private data : number | string | VertexData;
 }
 
 
-export class GLTextureResource extends GLResource 
+export class GLSamplerResource extends SamplerResource 
 {
     constructor()
     {
@@ -86,19 +73,19 @@ export class GLTextureResource extends GLResource
         
     }
 
-    public update(data: VertexData): void 
+    public update(texture: Texture): void 
     {
         
     }
 
     public override getName() : string { return this.name; } 
-    public override getType() : UniformType {return this.type; }
+    public override getType() : ResourceType {return this.type; }
     public override getAccessType() : ResourceAccessType { return this.accessType}
     public override getWriteFrequency() : WriteFrequency { return this.writeFrequency}
     public getTexture() : Texture { return this.texture; }
 
     private name : string;
-    private type : UniformType;
+    private type : ResourceType;
     private writeFrequency : WriteFrequency;
     private accessType : ResourceAccessType;
     private texture !: Texture;

@@ -1,4 +1,4 @@
-import { FrameBuffer, IGraphicsContext, IndexBuffer, Program, Resource, Sampler, Shader, Texture, UniformBuffer, VertexBuffer, VertexInput } from "./context/common/context";
+import { FrameBuffer, IGraphicsContext, IndexBuffer, Program, Resource, Sampler, SamplerResource, Shader, Texture, UniformBuffer, UniformResource, VertexBuffer, VertexInput } from "./context/common/context";
 import { GLGraphicsContext } from "./context/webgl/gl_context";
 
 let s_ctx : IGraphicsContext = new GLGraphicsContext();
@@ -187,11 +187,11 @@ export function createFrameBuffer(
  * @return A smart pointer to the base Resource class which abstracts context-related
  * operations and offers a minimal interface for the user.
  */
-export function createTextureResource(
+export function createSamplerResource(
     props:          TextureResourceProps
-) : Resource
+) : SamplerResource
 {
-    return s_ctx.createTextureResource(props);
+    return s_ctx.createSamplerResource(props);
 }
 
 /**
@@ -206,7 +206,7 @@ export function createTextureResource(
  */
 export function createUniformResource(
     props:          UniformResourceProps
-) : Resource
+) : UniformResource
 {
     return s_ctx.createUniformResource(props);
 }
@@ -301,7 +301,7 @@ export type Attribute =
 /**
  * @brief
  */
-export type UniformType =
+export type ResourceType =
     "Sampler"
     | "Float"
     | "Int"
@@ -679,7 +679,7 @@ export interface TextureResourceProps
 export interface UniformResourceProps 
 {
     name : string;
-    type : UniformType;
+    type : ResourceType;
     data: number | string | VertexData;
     writeFrequency : WriteFrequency;
     accessType : ResourceAccessType;

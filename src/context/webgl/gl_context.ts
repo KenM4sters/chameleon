@@ -1,11 +1,11 @@
-import { IGraphicsContext } from "../common/context";
-import { FrameBuffer, IndexBuffer, Program, Resource, Sampler, Shader, Texture, UniformBuffer, VertexBuffer, VertexInput } from "../common/context";
+import { IGraphicsContext, SamplerResource, UniformResource } from "../common/context";
+import { FrameBuffer, IndexBuffer, Program, Sampler, Shader, Texture, UniformBuffer, VertexBuffer, VertexInput } from "../common/context";
 import { FrameBufferProps, GraphicsSettings, IndexBufferProps, ProgramProps, SamplerProps, ShaderProps, TextureProps, TextureResourceProps, UniformBufferProps, UniformResourceProps, VertexBufferProps, VertexInputProps } from "../../graphics";
 import { GLIndexBuffer, GLUniformBuffer, GLVertexBuffer } from "./gl_buffer";
 import { GLProgram } from "./gl_program";
 import { GLShader } from "./gl_shader";
 import { GLVertexInput } from "./gl_vertex_input";
-import { GLTextureResource, GLUniformResource } from "./gl_resource";
+import { GLSamplerResource, GLUniformResource } from "./gl_resource";
 import { GLTexture } from "./gl_texture";
 import { GLSampler } from "./gl_sampler";
 import { GLFrameBuffer } from "./gl_framebuffer";
@@ -172,14 +172,14 @@ class GLGraphicsContext extends IGraphicsContext
         return frameBuffer;
     }
 
-    public override createTextureResource(props : TextureResourceProps) : Resource 
+    public override createSamplerResource(props : TextureResourceProps) : SamplerResource 
     {
-        let textureResource = new GLTextureResource();
-        textureResource.create(props);
-        return textureResource;
+        let samplerResource = new GLSamplerResource();
+        samplerResource.create(props);
+        return samplerResource;
     }
 
-    public override createUniformResource(props : UniformResourceProps) : Resource 
+    public override createUniformResource(props : UniformResourceProps) : UniformResource 
     {
         let uniformResource = new GLUniformResource();
         uniformResource.create(props);

@@ -1,9 +1,9 @@
-import { Shader } from "../common/context";
+import { Resource, Shader } from "../common/context";
 import { ShaderProps, VertexData, WriteFrequency } from "../../graphics";
-import { GLResource, GLTextureResource, GLUniformResource } from "./gl_resource";
 import { GLProgram } from "./gl_program";
 import { gl } from "./gl_context";
 import { GLTexture } from "./gl_texture";
+import { GLSamplerResource, GLUniformResource } from "./gl_resource";
 
 
 
@@ -20,7 +20,7 @@ class GLShader extends Shader
         
         for(let i = 0; i < props.count; i++) 
         {
-            this.resources.set(props.resources[i].getName(), props.resources[i] as GLResource);
+            this.resources.set(props.resources[i].getName(), props.resources[i] as Resource);
         }
 
         gl.useProgram(this.program.getContextHandle());
@@ -79,11 +79,6 @@ class GLShader extends Shader
         }
     }
 
-    public override update(name: string, data: VertexData): void 
-    {
-        
-    }
-
     public override bind() : void 
     {
         gl.useProgram(this.program.getContextHandle());
@@ -93,11 +88,10 @@ class GLShader extends Shader
             const res = entry[1];
             
             if(res.getWriteFrequency() == WriteFrequency.Dynamic) 
-            {
-
+            {                
                 if(res.getType() == "Sampler") 
                 {
-                    const textureResource = res as GLTextureResource;
+                    const textureResource = res as GLSamplerResource;
                     let tex = textureResource.getTexture() as GLTexture;
                     gl.bindTexture(gl.TEXTURE_2D, tex.getContextHandle());
                 }
@@ -139,8 +133,7 @@ class GLShader extends Shader
                             break;    
                         default:
                             gl.uniform1i(gl.getUniformLocation(this.program.getContextHandle(), entry[0]), uniformResource.getData() as number);  
-                }
-
+                    }
                 }
             }
         }
@@ -150,17 +143,17 @@ class GLShader extends Shader
     {        
         this.program.destroy();
     
-        this.resources.forEach((res : GLResource) => 
+        this.resources.forEach((res : Resource) => 
         {
             res.destroy();
         })
     }
 
     public getProgram() : GLProgram { return this.program; }
-    public getResources() : Map<string, GLResource> { return this.resources; }
+    public getResources() : Map<string, Resource> { return this.resources; }
 
     private program !: GLProgram;
-    private resources : Map<string, GLResource> = new Map();
+    private resources : Map<string, Resource> = new Map();
 }
 
 export {GLShader}
