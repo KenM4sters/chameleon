@@ -17,6 +17,7 @@ export class GLVertexInput extends VertexInput
 
         this.vao = 0;
         this.indexBuffer = null;
+        this.verticesCount = 0;
     } 
     
     /**
@@ -31,6 +32,7 @@ export class GLVertexInput extends VertexInput
         this.vertexBuffer = props.vBuffer as GLVertexBuffer;
         this.layout = props.layout;
         this.indexBuffer = props.iBuffer as GLIndexBuffer;
+        this.verticesCount = props.verticesCount;
 
         const id = gl.createVertexArray();
 
@@ -70,6 +72,7 @@ export class GLVertexInput extends VertexInput
         this.vao = 0;
     }
 
+    public override getVerticesCount(): number { return this.verticesCount; }
     public getContextHandle() : WebGLVertexArrayObject { return this.vao; }
     public getVertexBuffer() : GLVertexBuffer { return this.vertexBuffer; }
     public getIndexBuffer() : GLIndexBuffer | null { return this.indexBuffer; }
@@ -78,5 +81,6 @@ export class GLVertexInput extends VertexInput
     private vertexBuffer !: GLVertexBuffer; 
     private layout !: VertexLayout;
     private indexBuffer : GLIndexBuffer | null = null;
+    private verticesCount : number;
 
 };

@@ -245,7 +245,6 @@ export function createVertexInput(
     return s_ctx.createVertexInput(props);
 }
 
-
 /**
  * @brief 
  */
@@ -276,7 +275,7 @@ export function submit(
 {
     s_ctx.submit(input, shader);
 }
-
+  
 
 export type VertexData = Float32Array | Uint16Array | Uint8Array; 
 
@@ -674,7 +673,8 @@ export interface TextureResourceProps
     texture : Texture;
     writeFrequency : WriteFrequency;
     accessType : ResourceAccessType;
-}
+};
+
 
 export interface UniformResourceProps 
 {
@@ -694,6 +694,7 @@ export interface VertexInputProps
     vBuffer : VertexBuffer;
     layout : VertexLayout;
     iBuffer : IndexBuffer | null;
+    verticesCount : number;
 };
 
 

@@ -1,11 +1,11 @@
 import { FrameBuffer } from "../common/context";
-import { FrameBufferAttachment, FrameBufferProps } from "../../graphics";
+import { Attachment, FrameBufferAttachment, FrameBufferProps } from "../../graphics";
 import { g_glAttachments, g_glTargetTypes, gl } from "./gl_context";
 import { GLTexture } from "./gl_texture";
 
 
 
-class GLFrameBuffer extends FrameBuffer 
+export class GLFrameBuffer extends FrameBuffer 
 {
     constructor() 
     {
@@ -50,6 +50,26 @@ class GLFrameBuffer extends FrameBuffer
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }
 
+    public override setDrawAttachment(attachment : Attachment) : void 
+    {
+
+        let attachments = [];
+
+        for(const itr of this.attachments) 
+        {
+            attachments.push(g_glAttachments[itr.attachment]);
+        }
+        gl.bindTexture(gl.TEXTURE_2D, null);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo);
+        gl.drawBuffers(attachments);
+    }
+
+    public override clear() : void 
+    {
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    }
+
+
     public override resize(width: number, height: number): void 
     {
         
@@ -71,9 +91,4 @@ class GLFrameBuffer extends FrameBuffer
     private fbo : WebGLFramebuffer;
     private attachments : FrameBufferAttachment[];
     private count : number;
-}
-
-export 
-{
-    GLFrameBuffer
 }

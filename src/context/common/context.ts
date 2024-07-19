@@ -1,4 +1,4 @@
-import { FrameBufferProps, GraphicsSettings, IndexBufferProps, ProgramProps, SamplerProps, ShaderProps, TextureProps, TextureResourceProps, UniformBufferProps, UniformResourceProps, ResourceType, VertexBufferProps, VertexData, VertexInputProps, ResourceAccessType, WriteFrequency } from "../../graphics";
+import { FrameBufferProps, GraphicsSettings, IndexBufferProps, ProgramProps, SamplerProps, ShaderProps, TextureProps, TextureResourceProps, UniformBufferProps, UniformResourceProps, ResourceType, VertexBufferProps, VertexData, VertexInputProps, ResourceAccessType, WriteFrequency, Attachment } from "../../graphics";
 
 
 /**
@@ -104,6 +104,10 @@ export abstract class FrameBuffer
     public abstract create(props : FrameBufferProps) : void;
 
     public abstract resize(width : number, height : number) : void;
+
+    public abstract setDrawAttachment(attachment : Attachment) : void;
+
+    public abstract clear() : void;
 
     public abstract destroy() : void;
     
@@ -211,6 +215,8 @@ export abstract class Shader
 export abstract class VertexInput 
 {
     public abstract create(props: VertexInputProps) : void;
+
+    public abstract getVerticesCount() : number;
 
     public abstract destroy() : void;
     

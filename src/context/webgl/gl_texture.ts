@@ -62,7 +62,6 @@ export class GLTexture extends Texture
         else 
         {               
             gl.texImage2D(g_glTargetTypes[this.target], this.level, g_glInternalFormats[this.internalFormat], this.width, this.height, 0, g_glFormats[this.format], g_glValueTypes[this.type], null);
-            // gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, 512, 512, 0, gl.RGBA, gl.FLOAT, null);
         }
 
         if(this.nMipMaps > 0) 

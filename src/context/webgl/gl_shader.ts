@@ -1,5 +1,5 @@
 import { Resource, Shader } from "../common/context";
-import { ShaderProps, VertexData, WriteFrequency } from "../../graphics";
+import { ShaderProps, WriteFrequency } from "../../graphics";
 import { GLProgram } from "./gl_program";
 import { gl } from "./gl_context";
 import { GLTexture } from "./gl_texture";
@@ -7,7 +7,7 @@ import { GLSamplerResource, GLUniformResource } from "./gl_resource";
 
 
 
-class GLShader extends Shader 
+export class GLShader extends Shader 
 {
     constructor() 
     {
@@ -155,5 +155,3 @@ class GLShader extends Shader
     private program !: GLProgram;
     private resources : Map<string, Resource> = new Map();
 }
-
-export {GLShader}

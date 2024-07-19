@@ -40,15 +40,15 @@ class GLGraphicsContext extends IGraphicsContext
         canvas.width = settings.pixelViewportWidth;
         canvas.height = settings.pixelViewportHeight;
 
-        gl = canvas.getContext("webgl2") as WebGL2RenderingContext;
+        gl = canvas.getContext("webgl2", {antialias: true}) as WebGL2RenderingContext;
 
-        var ext1 = gl.getExtension('EXT_color_buffer_float');
+        let ext1 = gl.getExtension('EXT_color_buffer_float');
         if (!ext1) 
         {
             throw new Error('EXT_color_buffer_float is not supported')
         };
 
-        var ext2 = gl.getExtension('OES_texture_float_linear');
+        let ext2 = gl.getExtension('OES_texture_float_linear');
         if (!ext2) 
         {
             throw new Error('OES_texture_float_linear is not supported')
@@ -219,6 +219,8 @@ class GLGraphicsContext extends IGraphicsContext
     public override end() : void 
     {
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, null);
     }
 
     public override submit(vInput : VertexInput, shader : Shader) : void 
@@ -228,7 +230,7 @@ class GLGraphicsContext extends IGraphicsContext
 
         glShader.bind();
         gl.bindVertexArray(glInput.getContextHandle());
-        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+        gl.drawElements(gl.TRIANGLES, glInput.getVerticesCount(), gl.UNSIGNED_SHORT, 0);
         gl.useProgram(null);
         gl.bindVertexArray(null);
     }
