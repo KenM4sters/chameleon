@@ -54,14 +54,14 @@ export class GLTexture extends Texture
         {
             for(let i = 0; i < 6; i++) 
             {
-                gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X + i, this.level, g_glInternalFormats[this.internalFormat], this.width, this.height, 0, g_glFormats[this.format], g_glValueTypes[this.type], null);
+                gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X + i, this.level, g_glInternalFormats[this.internalFormat], this.width, this.height, 0, g_glFormats[this.format], g_glValueTypes[this.type], props.data);
             }
 
             this.isCube = true;
         }
         else 
         {               
-            gl.texImage2D(g_glTargetTypes[this.target], this.level, g_glInternalFormats[this.internalFormat], this.width, this.height, 0, g_glFormats[this.format], g_glValueTypes[this.type], null);
+            gl.texImage2D(g_glTargetTypes[this.target], this.level, g_glInternalFormats[this.internalFormat], this.width, this.height, 0, g_glFormats[this.format], g_glValueTypes[this.type], props.data);
         }
 
         if(this.nMipMaps > 0) 

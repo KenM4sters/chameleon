@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
 body 
 {
@@ -7,14 +9,68 @@ body
   margin: 0;
   padding: 0;
   overflow-x: hidden;
-  overflow-y: hidden;
+  font-family: "Inter", "sans-serif";
 }
 
-canvas
+.webgl_wrapper
 {
   position: absolute;
   top: 0;
   left: 0;
   margin: 0;
   padding: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  place-items: center;
+  z-index: -1;
+}
+
+#app 
+{
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.header_wrapper 
+{
+  display: flex;
+  justify-content: start;
+  place-items: center;
+  flex-direction: column;
+  width: 100vw;
+  height: 15vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.header_container 
+{
+  width: 90%;
+  height: 50%;
+  display: flex;
+  justify-content: space-between;
+  place-items: center;
+}
+
+.header_name 
+{
+  color: rgb(179, 179, 179);
+}
+
+.header_navbar 
+{
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
+  column-gap: 1vw;
+  color: rgb(181, 181, 181);
+
 }

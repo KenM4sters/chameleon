@@ -86,14 +86,18 @@ export class GLShader extends Shader
         for(const entry of this.resources) 
         {
             const res = entry[1];
-            
+
+            let textureUnitCounter = 0;
+
             if(res.getWriteFrequency() == WriteFrequency.Dynamic) 
             {                
                 if(res.getType() == "Sampler") 
                 {
                     const textureResource = res as GLSamplerResource;
                     let tex = textureResource.getTexture() as GLTexture;
+                    gl.activeTexture(gl.TEXTURE0 + textureUnitCounter);
                     gl.bindTexture(gl.TEXTURE_2D, tex.getContextHandle());
+                    textureUnitCounter++;
                 }
                 else 
                 {

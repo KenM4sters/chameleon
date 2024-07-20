@@ -13,6 +13,8 @@
     "vite": "^5.3.4"
   },
   "dependencies": {
-    "gl-matrix": "^3.4.3"
+    "@types/three": "^0.166.0",
+    "gl-matrix": "^3.4.3",
+    "three": "^0.166.1"
   }
 }

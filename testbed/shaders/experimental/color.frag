@@ -5,10 +5,7 @@ out vec4 frag_color;
 
 in vec2 v_uv;
 
-
-uniform sampler2D s_neptuneTexture;
-
 void main() 
 {   
-    frag_color = texture(s_neptuneTexture, v_uv).rgba;
+    frag_color = vec4(0.2, 0.2, 0.2, 1.0);
 }

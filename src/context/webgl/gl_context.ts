@@ -37,8 +37,6 @@ class GLGraphicsContext extends IGraphicsContext
     {
 
         canvas = settings.canvas;
-        canvas.width = settings.pixelViewportWidth;
-        canvas.height = settings.pixelViewportHeight;
 
         gl = canvas.getContext("webgl2", {antialias: true}) as WebGL2RenderingContext;
 
