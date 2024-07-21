@@ -47,7 +47,7 @@ void main()
 
 	// We are goung to put our final colour here
 	// initially we set all the elements to 0 
-	vec3 vResult = vec3(0.0);
+	vec3 vResult = vec3(0.05);
 
 	// We set the blue component of the result based on the IsGridLine() function
 	float res = IsGridLine(fragCoord);

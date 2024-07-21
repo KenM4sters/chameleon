@@ -175,7 +175,7 @@ void main()
     ///
     vec4 jupiterSurfaceWithMask = generateSphereSurfaceWithMask(uv + vec2(0.2, 0.15), 0.6);
     float jupiterLight = pow(max(dot(lightDirection, jupiterSurfaceWithMask.xyz), 0.0), 0.8);
-    vec4 jupiterAtmosphere = atmosphere( jupiterSurfaceWithMask, lightDirection, vec3(1.0, 0.7, 0.4) * 3.0, 0.2, 0.05, 0.6, 2.0);
+    vec4 jupiterAtmosphere = atmosphere( jupiterSurfaceWithMask, lightDirection, vec3(1.0, 0.1, 0.4) * 3.0, 0.2, 0.05, 0.6, 2.0);
     float jupiterMask = clamp(jupiterSurfaceWithMask.w, 0.0, 1.0);
     mat3 jupiterRotationMatrix = createRotationMatrix(-0.2, 0.3);
     vec3 rotatedJupiter = jupiterRotationMatrix * (jupiterSurfaceWithMask.xyz * jupiterMask);
@@ -187,7 +187,7 @@ void main()
     ///
     vec4 ioSurfaceWithMask = generateSphereSurfaceWithMask(uv + vec2(-0.32, -0.2), 0.07);
     float ioLight = pow(max(dot(lightDirection, ioSurfaceWithMask.xyz), 0.0), 0.4);
-    vec4 ioAtmosphere = atmosphere( ioSurfaceWithMask, lightDirection, vec3(1.0, 0.9, 0.8) * 1.5, 0.06, 0.03, 1.0, 4.0);
+    vec4 ioAtmosphere = atmosphere(ioSurfaceWithMask, lightDirection, vec3(0.1, 0.1, 0.1), 0.06, 0.03, 1.0, 4.0);
     float ioMask = clamp(ioSurfaceWithMask.w, 0.0, 1.0);
     mat3 ioRotationMatrix = createRotationMatrix(0.4, -0.1);
     vec3 rotatedIo = ioRotationMatrix * (ioSurfaceWithMask.xyz * ioMask);
@@ -215,7 +215,7 @@ void main()
     
     
     vec2 overlayUV = fragCoord.xy/ resolution.xy;
-    vec3 overlayColor = mix(0.3, 0.9, pow(overlayUV.x, 1.7)) * vec3(1.0, 0.35, 0.1)*1.4;
+    vec3 overlayColor = mix(0.3, 0.9, pow(overlayUV.x, 1.7)) * vec3(0.4, 0.4, 0.9);
     vec3 imageWithOverlay = mix(jupiterWithIoWithAtmosphere, overlayColor, pow(1.0 - overlayUV.y*0.5, 5.0)*0.7 + 0.1);
 
 

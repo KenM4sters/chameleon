@@ -40,6 +40,8 @@ class GLGraphicsContext extends IGraphicsContext
 
         gl = canvas.getContext("webgl2", {antialias: true}) as WebGL2RenderingContext;
 
+        gl.viewport(0, 0, canvas.width, canvas.height);
+
         let ext1 = gl.getExtension('EXT_color_buffer_float');
         if (!ext1) 
         {

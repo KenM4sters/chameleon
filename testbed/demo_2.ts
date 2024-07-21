@@ -2,6 +2,7 @@ import * as cml from "../src/chameleon"
 import * as glm from "gl-matrix"
 
 import screen_quad_vert from "./shaders/screen_quad.vert?raw";
+import model_view_projection_vert from "./shaders/experimental/model_view_projection.vert?raw";
 import texture_gen_frag from "./shaders/experimental/buffer_a.frag?raw";
 import animation_frag from "./shaders/experimental/buffer_b.frag?raw";
 import sharpen_frag from "./shaders/experimental/buffer_c.frag?raw";
@@ -14,14 +15,49 @@ let planet_image_vertices : number[] =
 [
     -1.0, -1.0, 0.0, 0.0, 0.0,
     1.0, -1.0, 0.0, 1.0, 0.0,
+    1.0, 0.90, 0.0, 1.0, 1.0,
+    0.6, 0.90, 0.0, 1.0, 1.0,
+    0.55, 1.0, 0.0, 1.0, 1.0,
+    -1.0, 0.90, 0.0, 0.0, 1.0,
+    -0.85, 0.90, 0.0, 0.0, 1.0,
+    -0.80, 1.0, 0.0, 0.0, 1.0
+];
+
+let planet_image_scaled_vertices : number[] = 
+[
+    -1.02, -1.0, 0.0, 0.0, 0.0,
+    1.0, -1.0, 0.0, 1.0, 0.0,
+    1.0, 0.90, 0.0, 1.0, 1.0,
+    0.6, 0.90, 0.0, 1.0, 1.0,
+    0.55, 1.0, 0.0, 1.0, 1.0,
+    -1.02, 0.90, 0.0, 0.0, 1.0,
+    -0.85, 0.90, 0.0, 0.0, 1.0,
+    -0.80, 1.0, 0.0, 0.0, 1.0
+];
+
+
+let planet_image_indices : number[] = 
+[
+    0, 1, 2, 
+    0, 2, 3,
+    0, 3, 4,
+    0, 4, 7,
+    0, 6, 7,
+    0, 5, 6
+];
+
+let screen_quad_vertices : number[] = 
+[
+    -1.0, -1.0, 0.0, 0.0, 0.0,
+    1.0, -1.0, 0.0, 1.0, 0.0,
     1.0, 1.0, 0.0, 1.0, 1.0,
     -1.0, 1.0, 0.0, 0.0, 1.0
 ];
 
-let planet_image_indices : number[] = 
+let screen_quad_indices : number[] = 
 [
-    0, 1, 2,
-    0, 3, 2
+    0, 1, 2, 
+    0, 3, 2,
 ];
 
 
@@ -46,10 +82,20 @@ export function RunDemo2()
 
     // View Frustum (maybe all of these should be part of the framework?).
     //
-    let projectionMatrix = glm.mat4.perspective(glm.mat4.create(), glm.glMatrix.toRadian(45), window.innerWidth / window.innerHeight, 0.1, 100.0);
-    let viewMatrix = glm.mat4.lookAt(glm.mat4.create(), [0, 0, 4], [0, 0, 0], [0, 1, 0]);
-    let uProjection = cml.createUniformResource({type: "Mat4x4f", data: new Float32Array(projectionMatrix), name: "u_projection", writeFrequency: cml.WriteFrequency.Static, accessType: cml.ResourceAccessType.PerFrame});
-    let uView = cml.createUniformResource({type: "Mat4x4f", data: new Float32Array(viewMatrix), name: "u_view", writeFrequency: cml.WriteFrequency.Static, accessType: cml.ResourceAccessType.PerFrame});
+    let camera = new cml.PerspectiveCamera([0, 0, 2.4]);
+
+
+    let uProjection = cml.createUniformResource({type: "Mat4x4f", data: new Float32Array(camera.GetProjectionMatrix(1.0, 1.0)), name: "u_projection", writeFrequency: cml.WriteFrequency.Dynamic, accessType: cml.ResourceAccessType.PerFrame});
+    let uView = cml.createUniformResource({type: "Mat4x4f", data: new Float32Array(camera.GetViewMatrix()), name: "u_view", writeFrequency: cml.WriteFrequency.Dynamic, accessType: cml.ResourceAccessType.PerFrame});
+
+    window.addEventListener("wheel", (e : WheelEvent) => 
+    {
+        camera.position[1] = window.scrollY * -0.01;
+        camera.target[1] = window.scrollY * -0.01;
+        uView.update(new Float32Array(camera.GetViewMatrix()));
+    });
+
+
 
     // Canvas, mouse and time uniforms (maybe all of these should be part of the framework?).
     //
@@ -58,6 +104,7 @@ export function RunDemo2()
     let uTime = cml.createUniformResource({type: "Float", name: "u_time", data: performance.now(), writeFrequency: cml.WriteFrequency.Dynamic, accessType: cml.ResourceAccessType.PerFrame});
     let uIsFirstFrame = cml.createUniformResource({type: "Int", name: "u_isFirstFrame", data: 1, writeFrequency: cml.WriteFrequency.Dynamic, accessType: cml.ResourceAccessType.PerFrame});
     let mousePosition = glm.vec2.create();
+
     window.addEventListener("mousemove", (e : MouseEvent) => 
     {
         let yPos = ((e.clientY - window.innerHeight) * -1) / window.innerHeight;
@@ -101,6 +148,48 @@ export function RunDemo2()
         iBuffer: planet_image_ebo,
         layout: planet_image_layout,
         verticesCount: planet_image_indices.length
+    });
+
+    // planet_image Input.
+    //
+    let planet_image_scaled_vbo = cml.createVertexBuffer({data: new Float32Array(planet_image_scaled_vertices), byteSize: planet_image_scaled_vertices.length * 4});
+    let planet_image_scaled_ebo = cml.createIndexBuffer({data: new Uint16Array(planet_image_indices), byteSize: planet_image_indices.length * 4});
+    
+    let planet_image_scaled_layout = new cml.VertexLayout(
+        [
+            new cml.VertexAttribute("Position", cml.ValueType.Float, 3),
+            new cml.VertexAttribute("TexCoords", cml.ValueType.Float, 2),
+        ], 
+        2
+    );
+
+    let planet_image_scaled_input = cml.createVertexInput(
+    {
+        vBuffer: planet_image_scaled_vbo,
+        iBuffer: planet_image_scaled_ebo,
+        layout: planet_image_scaled_layout,
+        verticesCount: planet_image_indices.length
+    });
+
+    // screen_quad Input.
+    //
+    let screen_quad_vbo = cml.createVertexBuffer({data: new Float32Array(screen_quad_vertices), byteSize: screen_quad_vertices.length * 4});
+    let screen_quad_ebo = cml.createIndexBuffer({data: new Uint16Array(screen_quad_indices), byteSize: screen_quad_indices.length * 4});
+    
+    let screen_quad_layout = new cml.VertexLayout(
+        [
+            new cml.VertexAttribute("Position", cml.ValueType.Float, 3),
+            new cml.VertexAttribute("TexCoords", cml.ValueType.Float, 2),
+        ], 
+        2
+    );
+
+    let screen_quad_input = cml.createVertexInput(
+    {
+        vBuffer: screen_quad_vbo,
+        iBuffer: screen_quad_ebo,
+        layout: screen_quad_layout,
+        verticesCount: screen_quad_indices.length
     });
 
 
@@ -160,7 +249,8 @@ export function RunDemo2()
     
     let model_identity = glm.mat4.create();
     
-    let planet_image_model = glm.mat4.scale(glm.mat4.create(), model_identity, [0.95, 0.95, 0.95]);
+    let planet_image_model = glm.mat4.translate(glm.mat4.create(), model_identity, [0, 0.0, 0]);
+    glm.mat4.scale(planet_image_model, planet_image_model, [0.95, 0.95, 0.95]);
     let uPlanetImageModel = cml.createUniformResource({name: "u_model", type: "Mat4x4f", data: new Float32Array(planet_image_model), writeFrequency: cml.WriteFrequency.Dynamic, accessType: cml.ResourceAccessType.PerDrawCall});    
 
     // Pass 1.
@@ -184,21 +274,27 @@ export function RunDemo2()
     // Pass 4.
     //
     let sImage = cml.createSamplerResource({name: "s_image", texture: texture1, writeFrequency: cml.WriteFrequency.Dynamic, accessType: cml.ResourceAccessType.PerDrawCall});    
-    let imageProgram = cml.createProgram({vertCode: screen_quad_vert, fragCode: image_frag});
-    let imageShader = cml.createShader({program: imageProgram, resources: [uPlanetImageModel, uCanvasWidth, uIsFirstFrame, uCanvasHeight, uMousePosition, uProjection, uView], count: 7});
+    let imageProgram = cml.createProgram({vertCode: model_view_projection_vert, fragCode: image_frag});
+    let imageShader = cml.createShader({program: imageProgram, resources: [uProjection, uView, uPlanetImageModel, uCanvasWidth, uIsFirstFrame, uCanvasHeight, uMousePosition], count: 7});
 
 
-    let scaledPlanetImageModel = glm.mat4.scale(glm.mat4.create(), model_identity, [0.952, 0.955, 0.955]);
-    glm.mat4.translate(scaledPlanetImageModel, scaledPlanetImageModel, [0, 0, -0.1]);
+    let scaledPlanetImageModel = glm.mat4.translate(glm.mat4.create(), model_identity, [0, 0.0, -0.1]);
+    glm.mat4.scale(scaledPlanetImageModel, scaledPlanetImageModel, [1.0, 1.0, 1.0]);
     let uScaledPlanetImageModel = cml.createUniformResource({name: "u_model", type: "Mat4x4f", data: new Float32Array(scaledPlanetImageModel), writeFrequency: cml.WriteFrequency.Dynamic, accessType: cml.ResourceAccessType.PerDrawCall});    
-    let scaledImageProgram = cml.createProgram({vertCode: screen_quad_vert, fragCode: color_frag});    
-    let scaledImageShader = cml.createShader({program: scaledImageProgram, resources: [uScaledPlanetImageModel], count: 1}); 
+    let scaledImageProgram = cml.createProgram({vertCode: model_view_projection_vert, fragCode: color_frag});    
+    let scaledImageShader = cml.createShader({program: scaledImageProgram, resources: [uProjection, uView, uScaledPlanetImageModel], count: 3}); 
     
     let backgroundModel = glm.mat4.scale(glm.mat4.create(), model_identity, [1.0, 1.0, 1.0]);
     glm.mat4.translate(backgroundModel, backgroundModel, [0, 0, -0.1]);
     let ubackgroundModel = cml.createUniformResource({name: "u_model", type: "Mat4x4f", data: new Float32Array(backgroundModel), writeFrequency: cml.WriteFrequency.Dynamic, accessType: cml.ResourceAccessType.PerDrawCall});    
     let backgroundProgram = cml.createProgram({vertCode: screen_quad_vert, fragCode: background_frag});
     let backgroundShader = cml.createShader({program: backgroundProgram, resources: [ubackgroundModel, uCanvasHeight, uCanvasHeight, uMousePosition], count: 4}); 
+
+
+    // Project images
+    //
+
+
 
 
     // Run.
@@ -224,10 +320,10 @@ export function RunDemo2()
             cml.submit(planet_image_input, sharpenShader);
             cml.end();
 
-            cml.begin(null);
-            cml.submit(planet_image_input, backgroundShader);
-            cml.submit(planet_image_input, scaledImageShader);
-            cml.submit(planet_image_input, imageShader);
+            cml.begin(null); 
+            cml.submit(screen_quad_input, backgroundShader);
+            // cml.submit(planet_image_scaled_input, scaledImageShader);
+            // cml.submit(planet_image_input, imageShader);
             cml.end();
 
             uIsFirstFrame.update(0);
