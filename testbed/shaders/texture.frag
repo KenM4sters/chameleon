@@ -5,9 +5,9 @@ out vec4 frag_color;
 
 in vec2 v_uv;
 
-uniform sampler2D s_texture;
+uniform sampler2D s_srcTexture;
 
 void main() 
 {   
-    frag_color = texture(s_texture, v_uv).rgba;
+    frag_color = vec4(texture(s_srcTexture, v_uv).rgb, 1.0);
 }

@@ -428,6 +428,7 @@ export enum ValueType
     UChar,
     SChar,
     Float,
+    UInt24_8,
     Count
 };
 
