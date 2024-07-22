@@ -596,7 +596,7 @@ export interface TextureProps
     level : number;
     usage : Usage;
     sampler : Sampler;
-    data : ArrayBufferView | Float32Array | Uint16Array | null;
+    data : ArrayBufferView | Float32Array | Uint16Array | HTMLImageElement | null;
 };  
 
 

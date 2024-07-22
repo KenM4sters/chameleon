@@ -5,6 +5,4 @@ window.addEventListener("DOMContentLoaded", () =>
 {
     const frontend = new Frontend();
     const experience = new Experience();
-    
-    experience.init();
 });

@@ -10,12 +10,12 @@ export class Frontend
         const headerWrapper = document.createElement("div");
         headerWrapper.classList.add("header_wrapper");
         headerWrapper.innerHTML = header_html;
-
-        const landingWrapper = document.createElement("div");
-        landingWrapper.classList.add("landing_wrapper");
-        landingWrapper.innerHTML = landing_html;
-
         app.appendChild(headerWrapper);
-        app.appendChild(landingWrapper);
+
+        const content = document.createElement("div");
+        content.classList.add("landing_wrapper active");
+        content.innerHTML = landing_html;
+
+        app.appendChild(content);
     }
 };

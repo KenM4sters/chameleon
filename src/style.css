@@ -72,7 +72,11 @@ body
   flex-direction: row;
   column-gap: 1vw;
   color: rgb(181, 181, 181);
+}
 
+.view_project 
+{
+  cursor: pointer;
 }
 
 

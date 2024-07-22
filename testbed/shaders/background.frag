@@ -3,6 +3,8 @@ precision highp float;
 
 out vec4 frag_color;
 
+in vec2 v_uv;
+
 uniform float u_time;
 uniform vec2 u_canvasDimensions;
 uniform vec2 u_mousePosition;
@@ -51,9 +53,21 @@ void main()
 	// We set the blue component of the result based on the IsGridLine() function
 	float res = IsGridLine(fragCoord);
 	res *= 0.1;
+
+
+	float mouseRadius = 0.1;
+
+	float mouseIsOnGridLine = IsGridLine(u_mousePosition * u_canvasDimensions);
+
 	if(res > 0.0) 
 	{
     	vResult.rgb = vec3(res);
+
+		vec2 mousePosDir = v_uv - u_mousePosition;
+		if(length(mousePosDir) < mouseRadius) 
+		{
+			vResult.rgb = vec3(0.2);
+		}
 	}
 
 	// The output to the shader is fragColor. 

@@ -81,11 +81,11 @@ class GLGraphicsContext extends IGraphicsContext
         [
             gl.R32I,
             gl.R32F,
-            gl.RG32I,
+            gl.RG,
             gl.RG32F,
-            gl.RGB32I,
+            gl.RGB,
             gl.RGB32F,
-            gl.RGBA32I,
+            gl.RGBA,
             gl.RGBA32F,
             gl.DEPTH24_STENCIL8
         ];

@@ -9,5 +9,12 @@ uniform sampler2D s_srcTexture;
 
 void main() 
 {   
-    frag_color = vec4(texture(s_srcTexture, v_uv).rgb, 1.0);
+    if(v_uv.x >= 1.0) 
+    {
+        frag_color = vec4(0.1, 0.1, 0.1, 1.0);
+    }
+    else 
+    {
+        frag_color = vec4(texture(s_srcTexture, v_uv).rgb, 1.0);
+    }
 }
