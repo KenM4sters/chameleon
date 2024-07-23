@@ -253,6 +253,14 @@ export function begin(target : FrameBuffer | null) : void
     s_ctx.begin(target);
 }
 
+/**
+ * @brief 
+ */
+export function setViewport(dimensions : {pixelWidth : number, pixelHeight : number}) : void 
+{
+    s_ctx.setViewport(dimensions);
+}
+
 
 /**
  * @brief

@@ -226,6 +226,11 @@ class GLGraphicsContext extends IGraphicsContext
         gl.bindTexture(gl.TEXTURE_2D, null);
     }
 
+    public override setViewport(dimensions : {pixelWidth : number, pixelHeight: number}) : void 
+    {
+        gl.viewport(0, 0, dimensions.pixelWidth, dimensions.pixelHeight);
+    }
+
     public override submit(vInput : VertexInput, shader : Shader) : void 
     {
         let glShader = shader as GLShader;

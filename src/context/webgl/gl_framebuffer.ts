@@ -1,7 +1,8 @@
 import { FrameBuffer } from "../common/context";
-import { Attachment, FrameBufferAttachment, FrameBufferProps } from "../../graphics";
-import { g_glAttachments, g_glTargetTypes, gl } from "./gl_context";
+import { Attachment, Format, FrameBufferAttachment, FrameBufferProps, ValueType } from "../../graphics";
+import { g_glAttachments, g_glFormats, g_glTargetTypes, g_glValueTypes, gl } from "./gl_context";
 import { GLTexture } from "./gl_texture";
+import { log } from "three/examples/jsm/nodes/Nodes.js";
 
 
 
@@ -50,19 +51,29 @@ export class GLFrameBuffer extends FrameBuffer
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }
 
-    public override setDrawAttachment(attachment : Attachment) : void 
+    public override drawAttachments() : void 
     {
-
         let attachments = [];
 
         for(const itr of this.attachments) 
         {
-            attachments.push(g_glAttachments[itr.attachment]);
+            if(itr.attachment <= Attachment.Color3)
+            {
+                attachments.push(g_glAttachments[itr.attachment]);
+            }
         }
-        gl.bindTexture(gl.TEXTURE_2D, null);
+                
         gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo);
         gl.drawBuffers(attachments);
     }
+
+    public override readPixels(attachment : Attachment, x : number, y : number, width: number, height : number, format : Format, type : ValueType, buffer : Float32Array) : void 
+    {
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo);
+        gl.readBuffer(g_glAttachments[attachment]);
+        gl.readPixels(x, y, width, height, g_glFormats[format], g_glValueTypes[type], buffer);
+    }
+
 
     public override clear() : void 
     {

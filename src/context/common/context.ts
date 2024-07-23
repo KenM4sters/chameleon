@@ -1,4 +1,4 @@
-import { FrameBufferProps, GraphicsSettings, IndexBufferProps, ProgramProps, SamplerProps, ShaderProps, TextureProps, TextureResourceProps, UniformBufferProps, UniformResourceProps, ResourceType, VertexBufferProps, VertexData, VertexInputProps, ResourceAccessType, WriteFrequency, Attachment } from "../../graphics";
+import { FrameBufferProps, GraphicsSettings, IndexBufferProps, ProgramProps, SamplerProps, ShaderProps, TextureProps, TextureResourceProps, UniformBufferProps, UniformResourceProps, ResourceType, VertexBufferProps, VertexData, VertexInputProps, ResourceAccessType, WriteFrequency, Attachment, Format, ValueType } from "../../graphics";
 
 
 /**
@@ -105,7 +105,9 @@ export abstract class FrameBuffer
 
     public abstract resize(width : number, height : number) : void;
 
-    public abstract setDrawAttachment(attachment : Attachment) : void;
+    public abstract drawAttachments() : void;
+
+    public abstract readPixels(attachment : Attachment, x : number, y : number, width: number, height : number, format : Format, type : ValueType, buffer : Float32Array) : void;
 
     public abstract clear() : void;
 
@@ -254,6 +256,8 @@ export abstract class IGraphicsContext
     public abstract createVertexInput(props : VertexInputProps) : VertexInput;
 
     public abstract begin(target : FrameBuffer | null) : void;
+
+    public abstract setViewport(dimensions : {pixelWidth : number, pixelHeight: number}) : void;
 
     public abstract end() : void;
 

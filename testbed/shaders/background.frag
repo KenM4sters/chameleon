@@ -1,7 +1,8 @@
 #version 300 es
 precision highp float;
 
-out vec4 frag_color;
+layout(location = 0) out vec4 scene_color;
+layout(location = 1) out vec4 mesh_id_color;
 
 in vec2 v_uv;
 
@@ -72,5 +73,6 @@ void main()
 
 	// The output to the shader is fragColor. 
 	// This is the colour we write to the screen for this pixel
-	frag_color = vec4(vResult, 1.0);
+	scene_color = vec4(vResult, 1.0);
+	mesh_id_color = vec4(13.0);
 }
