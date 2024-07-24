@@ -1,6 +1,7 @@
 import * as cml from "../src/chameleon"
 import * as glm from "gl-matrix"
 import { ProjectMesh } from "./project_mesh"
+import { ProjectID } from "./renderer";
 
 
 /**
@@ -54,6 +55,19 @@ export class Scene
     public create() : void 
     {
         
+    }
+
+    public getMesh(id : ProjectID) : ProjectMesh 
+    {
+        this.meshes.forEach((mesh : ProjectMesh) => 
+        {
+            if(mesh.id == id)     
+            {
+                return mesh;
+            }
+        })
+
+        return this.meshes[id];
     }
 
     public addMesh(mesh : ProjectMesh) : void 

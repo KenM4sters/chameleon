@@ -1,16 +1,6 @@
-import { Experience } from "../testbed/experience";
-import { Frontend } from "../testbed/frontend/frontend";
-import { Resources } from "../testbed/resources";
+import { Portfolio } from "../testbed/portfolio";
 
 window.addEventListener("DOMContentLoaded", () => 
 {
-    const frontend = new Frontend();
-    const experience = new Experience();
-    const resources = Resources.GetInstance();
-
-    resources.LoadAllAssets(() => 
-    {
-        experience.init();
-        experience.run();
-    });
+    const portfolio = new Portfolio();
 });

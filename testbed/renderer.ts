@@ -15,8 +15,8 @@ export enum ProjectID
     chameleon,
     pbr,
     sandbox,
-    raytracer,
     vulkanLights,
+    raytracer,
     shmup,
     bankingApp,
     gamesList,
@@ -138,7 +138,7 @@ export class Renderer
             attachment: cml.Attachment.Color0
         }
 
-        this.antiAliasBuffer = cml.createFrameBuffer({attachments: [MSAAColorAttachment1], count: 1});
+        this.downSampleBuffer = cml.createFrameBuffer({attachments: [MSAAColorAttachment1], count: 1});
 
         let displayQuadProgram = cml.createProgram({vertCode: screen_quad_vert, fragCode: texture_frag});
         let displayQuad_modelMatrix = glm.mat4.create();
@@ -157,7 +157,7 @@ export class Renderer
         scene.traverse((mesh : ProjectMesh) => 
         {
             cml.submit(mesh.vertexInput, mesh.shader);
-        })
+        });
 
         cml.submit(background.vertexInput, background.shader);
 
@@ -165,7 +165,26 @@ export class Renderer
 
 
 
-        cml.begin(this.antiAliasBuffer);
+        cml.begin(this.downSampleBuffer);
+        cml.setViewport({pixelWidth: window.innerWidth, pixelHeight: window.innerHeight});
+        cml.submit(this.primitives.fullScreenQuadInput, this.displayShader);
+        cml.end();
+
+        cml.begin(null);
+        cml.submit(this.primitives.fullScreenQuadInput, this.displayShader);
+        cml.end();
+    }
+
+    public renderBackgroundOnly(background : BackgroundMesh): void
+    {
+        cml.begin(this.sceneBuffer);
+        cml.setViewport({pixelWidth: window.innerWidth * this.highResolutionFactor, pixelHeight: window.innerHeight * this.highResolutionFactor});
+
+        cml.submit(background.vertexInput, background.shader);
+
+        cml.end();
+
+        cml.begin(this.downSampleBuffer);
         cml.setViewport({pixelWidth: window.innerWidth, pixelHeight: window.innerHeight});
         cml.submit(this.primitives.fullScreenQuadInput, this.displayShader);
         cml.end();
@@ -181,10 +200,10 @@ export class Renderer
     }
 
     public sceneBuffer !: cml.FrameBuffer;
-    public antiAliasBuffer !: cml.FrameBuffer;
+    public downSampleBuffer !: cml.FrameBuffer;
     public antialiasShader !: cml.Shader;
     public displayShader !: cml.Shader;
     public primitives !: Primitives;
     
-    public highResolutionFactor : number = 2.0;
+    public highResolutionFactor : number = 1.0;
 };

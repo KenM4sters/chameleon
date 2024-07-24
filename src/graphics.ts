@@ -371,6 +371,7 @@ export enum TargetType
 {
     Texture2D,
     TextureCube,
+    Texture2DMultisample,
     Count
 }
 

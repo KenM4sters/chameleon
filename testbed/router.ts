@@ -1,10 +1,31 @@
-import gsap from "gsap";
+import { View } from "./portfolio";
+import { StateResponder } from "./state_responder";
 
 
-export class Router 
+export let g_routes : View[] = 
+[
+    "mammoth",
+    "silverback",
+    "wgpu",
+    "chameleon",
+    "pbr",
+    "sandbox",
+    "vulkanLights",
+    "raytracer",
+    "shmup",
+    "bankingApp",
+    "gamesList",
+    "actixWeb"
+];
+
+export class Router extends StateResponder
 {
     constructor() 
     {
+        super();
+
+        this.onViewChange(this.handleViewChange);
+
         const contentWrapper = document.querySelector(".content_wrapper");
 
         if(!contentWrapper) 
@@ -14,27 +35,24 @@ export class Router
 
         this.contentWrapper = contentWrapper as HTMLElement;
         
-
-        this.handleNavigation("home");
-        
         window.addEventListener("popstate", (event) => 
         {
             this.handleNavigation(event.state ? event.state.path : "home");
         });
     }
 
-    public navigateTo(section : string) : void 
+    public navigateTo(view : View) : void 
     {
-        const path = `/${section}`;
+        const path = `/${view}`;
         
         // Update the URL and push the state to the history stack
-        history.pushState({ path: section }, "", path);
+        history.pushState({ path: view }, "", path);
 
         // Handle the navigation to show the correct content
-        this.handleNavigation(section);
+        this.handleNavigation(view);
     }
 
-    public handleNavigation(path : string) : void 
+    public handleNavigation(view : View) : void 
     {
         // Hide all sections
         document.querySelectorAll(".content_section").forEach((section) => 
@@ -43,7 +61,7 @@ export class Router
         });
 
         // Show the target section
-        const targetSection = document.getElementById(path);
+        const targetSection = document.getElementById(view);
 
         if(targetSection) 
         {
@@ -60,6 +78,11 @@ export class Router
 
             home.classList.add("active");
         }
+    }
+
+    private handleViewChange(view : View) : void 
+    {
+        this.navigateTo(view);
     }
 
     private contentWrapper : HTMLElement;

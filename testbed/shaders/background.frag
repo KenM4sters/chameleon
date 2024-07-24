@@ -73,6 +73,6 @@ void main()
 
 	// The output to the shader is fragColor. 
 	// This is the colour we write to the screen for this pixel
-	scene_color = vec4(vResult, 1.0);
+	scene_color = vec4(0.8, 0.8, 0.8, 1.0);
 	mesh_id_color = vec4(13.0);
 }

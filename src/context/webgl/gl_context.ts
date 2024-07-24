@@ -9,6 +9,8 @@ import { GLSamplerResource, GLUniformResource } from "./gl_resource";
 import { GLTexture } from "./gl_texture";
 import { GLSampler } from "./gl_sampler";
 import { GLFrameBuffer } from "./gl_framebuffer";
+import MeshSSSNodeMaterial from "three/examples/jsm/nodes/materials/MeshSSSNodeMaterial.js";
+
 
 let canvas : HTMLCanvasElement;
 let gl : WebGL2RenderingContext;
@@ -23,6 +25,7 @@ let g_glAttachments : number[];
 let g_glValueTypes : number[];
 
 
+
 /**
  * @brief 
  */
@@ -31,6 +34,8 @@ class GLGraphicsContext extends IGraphicsContext
     constructor() 
     {
         super();
+
+        this.isLastBuffer = false;
     }
 
     public override init(settings : GraphicsSettings) : void 
@@ -38,12 +43,15 @@ class GLGraphicsContext extends IGraphicsContext
 
         canvas = settings.canvas;
 
-        gl = canvas.getContext("webgl2", {antialias: true}) as WebGL2RenderingContext;
-
+        gl = canvas.getContext("webgl2", {antialias: false}) as WebGL2RenderingContext;
+        
         gl.viewport(0, 0, canvas.width, canvas.height);
         gl.depthFunc(gl.LEQUAL);
         gl.enable(gl.DEPTH_TEST);
 
+
+        // Extensions to support textures with floating point values (widely supported).
+        //
         let ext1 = gl.getExtension('EXT_color_buffer_float');
         if (!ext1) 
         {
@@ -56,6 +64,8 @@ class GLGraphicsContext extends IGraphicsContext
             throw new Error('OES_texture_float_linear is not supported')
         };
 
+        // Context-specific type arrays to be used with their respective enums as indexes.
+        //
         g_glSamplerFilterModes = 
         [
             gl.NEAREST,
@@ -74,6 +84,7 @@ class GLGraphicsContext extends IGraphicsContext
         g_glTargetTypes = 
         [
             gl.TEXTURE_2D,
+            gl.TEXTURE_2D_MULTISAMPLE,
             gl.TEXTURE_CUBE_MAP
         ];
 
@@ -119,6 +130,39 @@ class GLGraphicsContext extends IGraphicsContext
             gl.FLOAT,
             gl.UNSIGNED_INT_24_8
         ];
+
+
+        // MSAA buffer
+        //
+
+        const msaaFrameBuffer = gl.createFramebuffer();
+
+        if(!msaaFrameBuffer) 
+        {
+            throw new Error("Failed to create frame buffer!");  
+        } 
+
+        this.MSAAFrameBuffer = msaaFrameBuffer;
+
+        const msaaRenderBuffer = gl.createRenderbuffer();
+
+        if(!msaaRenderBuffer) 
+        {
+            throw new Error("Failed to create render buffer!");  
+        } 
+
+        this.MSAARenderBuffer = msaaRenderBuffer;
+        
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.MSAAFrameBuffer);
+        gl.bindRenderbuffer(gl.RENDERBUFFER, this.MSAARenderBuffer);
+        gl.renderbufferStorageMultisample(gl.RENDERBUFFER, gl.getParameter(gl.MAX_SAMPLES), gl.RGBA8, canvas.width, canvas.height);
+        gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, this.MSAARenderBuffer);
+        
+        if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) 
+        {
+            console.error('Framebuffer is not complete.');
+        }
+
     }
 
     public override shutdown() : void 
@@ -205,14 +249,17 @@ class GLGraphicsContext extends IGraphicsContext
 
     public override begin(target : FrameBuffer | null) : void 
     {
-        if(!target) 
+        if(target) 
         {
-            gl.bindFramebuffer(gl.FRAMEBUFFER, target);
+            this.isLastBuffer = false;
+            const frameBuffer = target as GLFrameBuffer;
+            gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer.getContextHandle());
         }
         else 
         {
-            const frameBuffer = target as GLFrameBuffer;
-            gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer.getContextHandle());
+            this.isLastBuffer = true;
+
+            gl.bindFramebuffer(gl.FRAMEBUFFER, this.MSAAFrameBuffer);
         }
 
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -221,9 +268,26 @@ class GLGraphicsContext extends IGraphicsContext
 
     public override end() : void 
     {
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, null);
+        if(!this.isLastBuffer) 
+        {            
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, null);
+        }
+        else 
+        {          
+            gl.bindFramebuffer(gl.READ_FRAMEBUFFER, this.MSAAFrameBuffer);
+            gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null); // display buffer. 
+            gl.blitFramebuffer(
+                0, 0, canvas.width, canvas.height, 
+                0, 0, canvas.width, canvas.height,
+                gl.COLOR_BUFFER_BIT, gl.LINEAR
+            );
+
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+            gl.bindFramebuffer(gl.READ_FRAMEBUFFER, null);
+            gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
+        }
     }
 
     public override setViewport(dimensions : {pixelWidth : number, pixelHeight: number}) : void 
@@ -242,6 +306,10 @@ class GLGraphicsContext extends IGraphicsContext
         gl.useProgram(null);
         gl.bindVertexArray(null);
     }
+
+    private isLastBuffer : boolean;
+    private MSAAFrameBuffer !: WebGLFramebuffer;
+    private MSAARenderBuffer !: WebGLRenderbuffer;
 }
 
 

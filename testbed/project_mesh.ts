@@ -11,15 +11,20 @@ export class ProjectMesh
     constructor() 
     {
         this.label = "";
+        this.position = [0, 0, 0];
+        this.scale = [1, 1, 1];
     }
 
     public create(projectId : ProjectID, label : string, img : HTMLImageElement, uProjection : cml.UniformResource, uView : cml.UniformResource, translation : glm.vec3, scale : glm.vec3) : void 
     {
         this.id = projectId;
+        this.label = label;
+        this.position = translation;
+        this.scale = scale;
+        
 
         const primitves = Primitives.getInstance();
 
-        this.label = label;
 
         let texture = cml.createTexture(
             {
@@ -68,6 +73,9 @@ export class ProjectMesh
     public uProjectId !: cml.UniformResource;
     public sTexture !: cml.SamplerResource;
     public modelMatrix !: glm.mat4;
+
+    public position : glm.vec3;
+    public scale : glm.vec3;
     
     public label : string;
     public id !: ProjectID;
