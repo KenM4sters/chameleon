@@ -67,6 +67,7 @@ export class Router extends StateResponder
         if(targetSection) 
         {
             targetSection.classList.add("active");       
+            targetSection.classList.add("fade_in");       
         } 
         else 
         {

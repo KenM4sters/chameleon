@@ -92,12 +92,44 @@ export class Frontend extends StateResponder
         this.app = document.querySelector("#app") as HTMLElement;
 
 
+
+        window.addEventListener("wheel", () => {
+            const elements = document.querySelectorAll(".scroll_trigger_fade_in");
+            
+            elements.forEach(element => 
+            {
+                const rect = element.getBoundingClientRect();
+                const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+                
+                // Check if the element is within the viewport
+                if (rect.top <= windowHeight * 0.75 && rect.bottom >= 0) {
+                    // Element is in the viewport, apply animation
+                    if (!element.classList.contains('fade_in')) 
+                    {
+                        element.classList.add("fade_in");
+                    }
+                }
+            })
+        });
+
+
         // Navigate to home on instantation.
         this.triggerViewChange("home");
     } 
 
     private handleViewChange(view : View) : void 
     {
+
+        const elements = document.querySelectorAll(".scroll_trigger_fade_in");
+            
+        elements.forEach(element => 
+        {
+            if (element.classList.contains('fade_in')) 
+            {
+                element.classList.remove("fade_in");
+            }
+        })
+
         switch(view) 
         {
             case "home": this.setForHome(); break;

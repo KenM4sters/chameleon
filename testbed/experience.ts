@@ -1,16 +1,12 @@
 import * as cml from "../src/chameleon"
 import * as glm from "gl-matrix"
 
-import { Scene } from "./scene";
 import { ProjectID, Renderer } from "./renderer";
-import { BackgroundMesh, ProjectMesh } from "./mesh";
-import { Resources } from "./resources";
-import { Primitives } from "./primitives";
 import { g_routes } from "./router";
 import { View } from "./portfolio";
 import { StateResponder } from "./state_responder";
-
-
+import { ProjectMesh, ProjectsList } from "./projects_list";
+import { Background } from "./background";
 
 
 export class Experience extends StateResponder
@@ -49,16 +45,6 @@ export class Experience extends StateResponder
 
 
 
-        // Members
-        //
-        this.primitves = Primitives.getInstance();
-        this.primitves.create();
-        
-        this.scene = new Scene();
-        this.scene.create();
-        
-        
-
         // Common uniforms
         //
         this.currentMousePosition = glm.vec2.create();
@@ -66,11 +52,6 @@ export class Experience extends StateResponder
         this.uTime = cml.createUniformResource({type: "Float", name: "u_time", data: performance.now(), writeFrequency: cml.WriteFrequency.Dynamic, accessType: cml.ResourceAccessType.PerFrame});
         this.uMousePosition = cml.createUniformResource({type: "Vec2f", name: "u_mousePosition", data: new Float32Array(this.currentMousePosition), writeFrequency: cml.WriteFrequency.Dynamic, accessType: cml.ResourceAccessType.PerFrame});
         
-
-
-
-        this.renderer = new Renderer();
-        this.renderer.create(this.uCanvasDimensions, this.uMousePosition);
 
         // View Frustum (maybe all of these should be part of the framework?).
         //
@@ -80,47 +61,19 @@ export class Experience extends StateResponder
         let uView = cml.createUniformResource({type: "Mat4x4f", data: new Float32Array(camera.GetViewMatrix()), name: "u_view", writeFrequency: cml.WriteFrequency.Dynamic, accessType: cml.ResourceAccessType.PerFrame});
 
 
-        // Projects
-        //
-        let projectMeshes : {translation : glm.vec3, scale : glm.vec3, id : ProjectID, label : string}[] = 
-        [
-            {translation: [0.0, 0.0, 0.0], scale: [0.8, 0.8, 0.04], id: ProjectID.mammoth, label: "mammoth"},
-            {translation: [0.0, 0.0, 0.6], scale: [0.8, 0.8, 0.04], id: ProjectID.silverback, label: "mammoth"},
-            {translation: [0.0, 0.0, 1.2], scale: [0.8, 0.8, 0.04], id: ProjectID.wgpu, label: "mammoth"},
-            {translation: [0.0, 0.0, 1.8], scale: [0.8, 0.8, 0.04], id: ProjectID.chameleon, label: "chameleon_marbles"},
-            {translation: [0.0, 0.0, 2.4], scale: [0.8, 0.8, 0.04], id: ProjectID.pbr, label: "pbr_metal"},
-            {translation: [0.0, 1.0, 3.0], scale: [0.8, 0.8, 0.04], id: ProjectID.sandbox, label: "sandbox"},
-            {translation: [0.0, 0.0, 3.6], scale: [0.8, 0.8, 0.04], id: ProjectID.vulkanLights, label: "vulkan_lights"},
-            {translation: [0.0, 0.0, 4.2], scale: [0.8, 0.8, 0.04], id: ProjectID.raytracer, label: "raytracer"},
-            {translation: [0.0, 0.0, 4.8], scale: [0.8, 0.8, 0.04], id: ProjectID.shmup, label: "shmup"},
-            {translation: [0.0, 0.0, 5.4], scale: [0.8, 0.8, 0.04], id: ProjectID.bankingApp, label: "mammoth"},
-            {translation: [0.0, 0.0, 6.0], scale: [0.8, 0.8, 0.04], id: ProjectID.gamesList, label: "games_list"},
-            {translation: [0.0, 0.0, 6.6], scale: [0.8, 0.8, 0.04], id: ProjectID.actixWeb, label: "mammoth"}
-        ];
+        this.renderer = new Renderer();
+        this.renderer.create(this.uCanvasDimensions, this.uMousePosition);
 
-        projectMeshes.forEach((project) => 
-        {
-            let mesh = new ProjectMesh();
 
-            let resources = Resources.GetInstance();
-            let img = resources.GetTexture(project.label);
+        this.projectsList = new ProjectsList();
+        this.projectsList.create(uView, uProjection);
 
-            if(!img) 
-            {
-                throw new Error(`Failed to create mesh - no matching texture with name, ${project.label}`);
-            }
-        
-            mesh.create(project.id, project.label, img, uProjection, uView, project.translation, project.scale);
 
-            this.scene.addMesh(mesh);
-        });
-
-        
-        // Background
-        //
-        this.background = new BackgroundMesh();
+        this.background = new Background();
         this.background.create(this.uCanvasDimensions, this.uMousePosition);
         
+        
+
 
         // Listeners
         //
@@ -138,7 +91,7 @@ export class Experience extends StateResponder
 
             if(this.getCurrentView() == "home") 
             {
-                this.renderer.render(this.scene, this.background);
+                this.renderer.render(this.projectsList, this.background);
             } 
             else 
             {
@@ -151,7 +104,7 @@ export class Experience extends StateResponder
 
     private respondToMouseMove(e : MouseEvent) : void
     {
-        if(this.getCurrentView()== "home") 
+        if(this.getCurrentView() == "home") 
         {
             let yPos = ((e.clientY - window.innerHeight) * -1) / window.innerHeight;
             let xPos = e.clientX / window.innerWidth;
@@ -171,13 +124,14 @@ export class Experience extends StateResponder
 
     private respondToMouseClick(e : MouseEvent) : void 
     {
-        if(this.getCurrentView()== "home") 
+        if(this.getCurrentView() == "home") 
         {
             if(this.intersectedProject != null) 
             {
                 this.selectedProject = this.intersectedProject;
                 
-                const selectedMesh = this.scene.getMesh(this.selectedProject);
+                const selectedMesh = this.projectsList.getMesh(this.selectedProject);
+                
                 
                 if(selectedMesh.position[2] <= 3.1 && selectedMesh.position[2] >= 2.9) 
                 {
@@ -189,7 +143,7 @@ export class Experience extends StateResponder
                 {
                     const difference = 3.0 - selectedMesh.position[2];
     
-                    this.scene.traverse((mesh : ProjectMesh) => 
+                    this.projectsList.traverse((mesh : ProjectMesh) => 
                     {
                         mesh.position[2] += difference;
                         mesh.modelMatrix = glm.mat4.create();
@@ -205,9 +159,9 @@ export class Experience extends StateResponder
 
     private respondToScroll(e: WheelEvent) : void
     {
-        if(this.getCurrentView()== "home") 
+        if(this.getCurrentView() == "home") 
         {            
-            this.scene.traverse((mesh : ProjectMesh) => 
+            this.projectsList.traverse((mesh : ProjectMesh) => 
             {
                 glm.vec3.add(mesh.position, mesh.position, [0, 0, e.deltaY * 0.002]);
     
@@ -218,7 +172,7 @@ export class Experience extends StateResponder
                 {
                     if(mesh.position[1] > 0.0) 
                     {
-                        mesh.position[1] -= 0.01;
+                        mesh.position[1] -= 0.05;
                     }
                 }
     
@@ -238,19 +192,19 @@ export class Experience extends StateResponder
 
         this.renderer.sceneBuffer.readPixels(cml.Attachment.Color1, mousePosition[0], this.canvas.height - mousePosition[1], 1, 1, cml.Format.RGBA, cml.ValueType.Float, pixel);
         
-        const app = document.getElementById("app") as HTMLElement;
+        const app = document.getElementById("app") as HTMLElement;        
 
         if(pixel[0] < ProjectID.count) 
         {
             app.style.cursor = "pointer";
 
-            this.scene.traverse((mesh : ProjectMesh) => 
+            this.projectsList.traverse((mesh : ProjectMesh) => 
             {
                 if(mesh.id == pixel[0]) 
                 {
                     this.intersectedProject = mesh.id;
                 }
-            });
+            });            
         }
         else 
         {
@@ -262,18 +216,18 @@ export class Experience extends StateResponder
     private handleViewChange(view : View) : void 
     {
     }
-
-    private scene !: Scene;
-    private renderer !: Renderer;
-    private primitves !: Primitives;
-    private background !: BackgroundMesh;
-
+    
     private currentMousePosition !: glm.vec2;
-
-    private canvas !: HTMLCanvasElement;
     private uTime !: cml.UniformResource;
     private uMousePosition !: cml.UniformResource;
     private uCanvasDimensions !: cml.UniformResource;
+    
+    private canvas !: HTMLCanvasElement;
     private intersectedProject : ProjectID | null;
     private selectedProject : ProjectID | null;
+
+    private projectsList !: ProjectsList;
+    private renderer !: Renderer;
+    private background !: Background;
+
 };

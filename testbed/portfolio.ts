@@ -29,7 +29,7 @@ export class Portfolio
         const router = new Router();
 
         const frontend = new Frontend();
-        frontend.create(router)
+        frontend.create(router);
         
         const experience = new Experience();        
 
