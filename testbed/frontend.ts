@@ -1,5 +1,7 @@
 import header_html from "./html/header.html?raw";
 import home_html from "./html/home.html?raw";
+import about_html from "./html/about.html?raw";
+
 import { View } from "./portfolio";
 import { Project, ProjectProps, projects } from "./project";
 import { Router } from "./router";
@@ -12,6 +14,7 @@ export class Frontend extends StateResponder
     {
         super();
 
+        this.handleViewChange = this.handleViewChange.bind(this);
         this.onViewChange(this.handleViewChange);
     }
 
@@ -33,6 +36,13 @@ export class Frontend extends StateResponder
         }
         home.innerHTML = home_html;
 
+        const about = document.querySelector(".about_wrapper");
+        if(!about) 
+        {
+            throw new Error("Failed to find dom element with class list containing: about_wrapper");
+        }
+        about.innerHTML = about_html;
+
         // Fills each project div with the appropriate content
         //
         projects.forEach((props : ProjectProps) => 
@@ -51,20 +61,39 @@ export class Frontend extends StateResponder
 
 
 
-        const home_button = document.querySelector("#home_button");
+        const homeLink = document.querySelector("#home_link") as HTMLElement | null;
 
-        if(!home_button) 
+        if(!homeLink) 
         {
-            throw new Error("Failed to find dom element with id: home_button");
+            throw new Error("Failed to find dom element with id: home_link");
         }
 
-        home_button.addEventListener("click", () => 
+        this.homeLink = homeLink;
+
+        this.homeLink.addEventListener("click", () => 
         {
-            router.navigateTo("home");
+            this.triggerViewChange("home");
         });
 
+        const aboutLink = document.querySelector("#about_link") as HTMLElement | null;
+
+        if(!aboutLink) 
+        {
+            throw new Error("Failed to find dom element with id: about_link");
+        }
+
+        this.aboutLink = aboutLink;
+
+        this.aboutLink.addEventListener("click", () => 
+        {
+            this.triggerViewChange("about");
+        });
+
+        this.app = document.querySelector("#app") as HTMLElement;
+
+
         // Navigate to home on instantation.
-        router.navigateTo("home");
+        this.triggerViewChange("home");
     } 
 
     private handleViewChange(view : View) : void 
@@ -79,22 +108,35 @@ export class Frontend extends StateResponder
 
     private setForHome() : void 
     {
-        this.body.style.overflowX = "hidden";
-        this.body.style.overflowY = "hidden";
+        this.app.style.overflowX = "hidden";
+        this.app.style.overflowY = "hidden";
+
+        this.homeLink.classList.add("active");
+        this.aboutLink.classList.remove("active");
     }   
 
     private setForAbout() : void 
     {
-        this.body.style.overflowX = "hidden";
-        this.body.style.overflowY = "hidden";
+        this.app.style.overflowX = "hidden";
+        this.app.style.overflowY = "hidden";
+        this.app.style.cursor = "default";
+
+        this.aboutLink.classList.add("active");
+        this.homeLink.classList.remove("active");
     }
 
     private setForProject() : void 
     {
-        this.body.style.overflowX = "hidden";
-        this.body.style.overflowY = "visible";
+        this.app.style.overflowX = "hidden";
+        this.app.style.overflowY = "visible";
+        this.app.style.cursor = "default";
+
+        this.aboutLink.classList.remove("active");
+        this.homeLink.classList.remove("active");
     }
 
 
-    private body !: HTMLElement;
+    private app !: HTMLElement;
+    private homeLink !: HTMLElement;
+    private aboutLink !: HTMLElement;
 };

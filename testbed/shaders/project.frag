@@ -17,7 +17,7 @@ void main()
 
     if(v_uv.x >= 1.0) 
     {
-        scene_color = vec4(1.0, 1.0, 1.0, 1.0);
+        scene_color = vec4(0.8, 0.8, 0.8, 1.0);
     }
     else 
     {

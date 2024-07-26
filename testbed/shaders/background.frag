@@ -9,6 +9,7 @@ in vec2 v_uv;
 uniform float u_time;
 uniform vec2 u_canvasDimensions;
 uniform vec2 u_mousePosition;
+uniform float u_currentView;
 
 // This helper function returns 1.0 if the current pixel is on a grid line, 0.0 otherwise
 float IsGridLine(vec2 fragCoord)
@@ -37,6 +38,11 @@ float IsGridLine(vec2 fragCoord)
 
 	// return the result
 	return fIsGridLine;
+}
+
+// Function to generate random noise
+float random(vec2 st) {
+	return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
 }
 
 // main is the entry point to the shader. 
@@ -73,6 +79,12 @@ void main()
 
 	// The output to the shader is fragColor. 
 	// This is the colour we write to the screen for this pixel
-	scene_color = vec4(0.8, 0.8, 0.8, 1.0);
+
+	vec4 color = vec4(mix(vec3(0.1, 0.1, 0.3), vec3(0.1, 0.1, 0.15), u_currentView), 1.0);
+	float noise = random(fragCoord);
+	// color += noise * 0.02;
+	scene_color = color;
+	
+
 	mesh_id_color = vec4(13.0);
 }

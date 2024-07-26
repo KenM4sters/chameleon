@@ -24,6 +24,7 @@ export class Router extends StateResponder
     {
         super();
 
+        this.handleViewChange = this.handleViewChange.bind(this);
         this.onViewChange(this.handleViewChange);
 
         const contentWrapper = document.querySelector(".content_wrapper");
@@ -62,7 +63,7 @@ export class Router extends StateResponder
 
         // Show the target section
         const targetSection = document.getElementById(view);
-
+        
         if(targetSection) 
         {
             targetSection.classList.add("active");       

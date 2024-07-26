@@ -1,19 +1,14 @@
 import * as cml from "../src/chameleon"
 import * as glm from "gl-matrix"
 
-import screen_quad_vert from "./shaders/screen_quad.vert?raw";
-import background_frag from "./shaders/background.frag?raw";
-
-import { BackgroundMesh, Scene } from "./scene";
+import { Scene } from "./scene";
 import { ProjectID, Renderer } from "./renderer";
-import { ProjectMesh } from "./project_mesh";
+import { BackgroundMesh, ProjectMesh } from "./mesh";
 import { Resources } from "./resources";
 import { Primitives } from "./primitives";
 import { g_routes } from "./router";
 import { View } from "./portfolio";
 import { StateResponder } from "./state_responder";
-
-
 
 
 
@@ -26,6 +21,7 @@ export class Experience extends StateResponder
         this.intersectedProject = null;
         this.selectedProject = null;
 
+        this.handleViewChange = this.handleViewChange.bind(this);
         this.onViewChange(this.handleViewChange);
     } 
 
@@ -51,20 +47,30 @@ export class Experience extends StateResponder
 
         cml.init(settings);
 
+
+
+        // Members
+        //
         this.primitves = Primitives.getInstance();
         this.primitves.create();
         
         this.scene = new Scene();
         this.scene.create();
         
-        this.renderer = new Renderer();
-        this.renderer.create();
-
         
+
+        // Common uniforms
+        //
         this.currentMousePosition = glm.vec2.create();
         this.uCanvasDimensions = cml.createUniformResource({type: "Vec2f", name: "u_canvasDimensions", data: new Float32Array([this.canvas.width, this.canvas.height]), writeFrequency: cml.WriteFrequency.Dynamic, accessType: cml.ResourceAccessType.PerMaterial});
         this.uTime = cml.createUniformResource({type: "Float", name: "u_time", data: performance.now(), writeFrequency: cml.WriteFrequency.Dynamic, accessType: cml.ResourceAccessType.PerFrame});
         this.uMousePosition = cml.createUniformResource({type: "Vec2f", name: "u_mousePosition", data: new Float32Array(this.currentMousePosition), writeFrequency: cml.WriteFrequency.Dynamic, accessType: cml.ResourceAccessType.PerFrame});
+        
+
+
+
+        this.renderer = new Renderer();
+        this.renderer.create(this.uCanvasDimensions, this.uMousePosition);
 
         // View Frustum (maybe all of these should be part of the framework?).
         //
@@ -73,6 +79,9 @@ export class Experience extends StateResponder
         let uProjection = cml.createUniformResource({type: "Mat4x4f", data: new Float32Array(camera.GetProjectionMatrix(1.0, 1.0)), name: "u_projection", writeFrequency: cml.WriteFrequency.Dynamic, accessType: cml.ResourceAccessType.PerFrame});
         let uView = cml.createUniformResource({type: "Mat4x4f", data: new Float32Array(camera.GetViewMatrix()), name: "u_view", writeFrequency: cml.WriteFrequency.Dynamic, accessType: cml.ResourceAccessType.PerFrame});
 
+
+        // Projects
+        //
         let projectMeshes : {translation : glm.vec3, scale : glm.vec3, id : ProjectID, label : string}[] = 
         [
             {translation: [0.0, 0.0, 0.0], scale: [0.8, 0.8, 0.04], id: ProjectID.mammoth, label: "mammoth"},
@@ -110,15 +119,11 @@ export class Experience extends StateResponder
         // Background
         //
         this.background = new BackgroundMesh();
-        let backgroundProgram = cml.createProgram({vertCode: screen_quad_vert, fragCode: background_frag});
-        let background_vertexInput = this.primitves.fullScreenQuadInput;
-        let background_modelMatrix = glm.mat4.create();
-        glm.mat4.translate(background_modelMatrix, background_modelMatrix, [0, 0, 1.0]);
-        let background_uModelMatrix = cml.createUniformResource({name: "u_model", type: "Mat4x4f", data: new Float32Array(background_modelMatrix), accessType: cml.ResourceAccessType.PerDrawCall, writeFrequency: cml.WriteFrequency.Dynamic});
-        let background_shader = cml.createShader({program: backgroundProgram, resources: [background_uModelMatrix, this.uCanvasDimensions, this.uMousePosition], count: 3});
-        this.background.create(backgroundProgram, background_vertexInput, background_modelMatrix, background_uModelMatrix, background_shader);
+        this.background.create(this.uCanvasDimensions, this.uMousePosition);
         
 
+        // Listeners
+        //
         window.addEventListener("wheel", (e : WheelEvent) => this.respondToScroll(e));
         window.addEventListener("mousemove", (e : MouseEvent) => this.respondToMouseMove(e));
         window.addEventListener("click", (e : MouseEvent) => this.respondToMouseClick(e));
@@ -131,7 +136,7 @@ export class Experience extends StateResponder
         {
             this.uTime.update(performance.now() * 0.0005);
 
-            if(this.currentView == "home") 
+            if(this.getCurrentView() == "home") 
             {
                 this.renderer.render(this.scene, this.background);
             } 
@@ -146,7 +151,7 @@ export class Experience extends StateResponder
 
     private respondToMouseMove(e : MouseEvent) : void
     {
-        if(this.currentView == "home") 
+        if(this.getCurrentView()== "home") 
         {
             let yPos = ((e.clientY - window.innerHeight) * -1) / window.innerHeight;
             let xPos = e.clientX / window.innerWidth;
@@ -166,7 +171,7 @@ export class Experience extends StateResponder
 
     private respondToMouseClick(e : MouseEvent) : void 
     {
-        if(this.currentView == "home") 
+        if(this.getCurrentView()== "home") 
         {
             if(this.intersectedProject != null) 
             {
@@ -200,7 +205,7 @@ export class Experience extends StateResponder
 
     private respondToScroll(e: WheelEvent) : void
     {
-        if(this.currentView == "home") 
+        if(this.getCurrentView()== "home") 
         {            
             this.scene.traverse((mesh : ProjectMesh) => 
             {
@@ -253,12 +258,6 @@ export class Experience extends StateResponder
             this.intersectedProject = null;
         }
     }
-
-    private isViewingProject() : boolean 
-    {
-        return this.currentView != "home" && this.currentView != "about";
-    }
-
 
     private handleViewChange(view : View) : void 
     {

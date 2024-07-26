@@ -1,45 +1,5 @@
-import * as cml from "../src/chameleon"
-import * as glm from "gl-matrix"
-import { ProjectMesh } from "./project_mesh"
+import { ProjectMesh } from "./mesh"
 import { ProjectID } from "./renderer";
-
-
-/**
- * @brief
- */
-export class BackgroundMesh 
-{
-    constructor() 
-    {
-    }
-
-    public create(program : cml.Program, vertexInput : cml.VertexInput, model : glm.mat4, uModelMatrix : cml.UniformResource, shader : cml.Shader) : void 
-    {
-        this.program = program;
-        this.vertexInput = vertexInput;
-        this.modelMatrix = model;
-        this.uModelMatrix = uModelMatrix;
-        this.shader = shader;
-    }
-
-    public select() : void 
-    {
-
-    }
-
-    public destroy() : void 
-    {
-        this.program.destroy();
-        this.vertexInput.destroy();
-    }
-
-    public program !: cml.Program;
-    public shader !: cml.Shader;
-    public vertexInput !: cml.VertexInput;
-    public modelMatrix !: glm.mat4;
-    public uModelMatrix !: cml.UniformResource;
-};
-
 
 
 /**

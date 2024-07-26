@@ -3,6 +3,11 @@ import * as glm from "gl-matrix"
 import { Primitives } from "./primitives";
 import { ProjectID } from "./renderer";
 
+import screen_quad_vert from "./shaders/screen_quad.vert?raw";
+import background_frag from "./shaders/background.frag?raw";
+import { StateResponder } from "./state_responder";
+import { View } from "./portfolio";
+
 /**
  * @brief
  */
@@ -79,4 +84,55 @@ export class ProjectMesh
     
     public label : string;
     public id !: ProjectID;
+};
+
+
+/**
+ * @brief
+ */
+export class BackgroundMesh extends StateResponder 
+{
+    constructor() 
+    {
+        super();
+
+        this.handleViewChange = this.handleViewChange.bind(this);
+        this.onViewChange(this.handleViewChange);
+    }
+
+    public create(uCanvasDimensions : cml.UniformResource, uMousePosition : cml.UniformResource) : void 
+    {
+        this.program = cml.createProgram({vertCode: screen_quad_vert, fragCode: background_frag});
+        this.vertexInput = Primitives.getInstance().fullScreenQuadInput;
+        this.modelMatrix = glm.mat4.create();
+        glm.mat4.translate(this.modelMatrix, this.modelMatrix, [0, 0, 1.0]);
+        this.uModelMatrix = cml.createUniformResource({name: "u_model", type: "Mat4x4f", data: new Float32Array(this.modelMatrix), accessType: cml.ResourceAccessType.PerDrawCall, writeFrequency: cml.WriteFrequency.Dynamic});
+        this.uCurrentView = cml.createUniformResource({name: "u_currentView", type: "Float", data: 0.0, accessType: cml.ResourceAccessType.PerDrawCall, writeFrequency: cml.WriteFrequency.Dynamic});
+
+
+        this.shader = cml.createShader({program: this.program, resources: [this.uModelMatrix, uCanvasDimensions, uMousePosition, this.uCurrentView], count: 4});
+    }
+
+    public handleViewChange(view : View) : void 
+    {        
+        switch(view) 
+        {
+            case "home": this.uCurrentView.update(0.0); break;
+            case "about": this.uCurrentView.update(0.0); break;
+            default: this.uCurrentView.update(1.0); break;
+        }
+    }
+
+    public destroy() : void 
+    {
+        this.program.destroy();
+        this.vertexInput.destroy();
+    }
+
+    public program !: cml.Program;
+    public shader !: cml.Shader;
+    public vertexInput !: cml.VertexInput;
+    public modelMatrix !: glm.mat4;
+    public uModelMatrix !: cml.UniformResource;
+    public uCurrentView !: cml.UniformResource;
 };

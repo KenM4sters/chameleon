@@ -1,9 +1,11 @@
 import * as cml from "../src/chameleon"
 import * as glm from "gl-matrix"
-import { BackgroundMesh, Scene } from "./scene";
-import { ProjectMesh } from "./project_mesh";
+import { Scene } from "./scene";
+import { BackgroundMesh, ProjectMesh } from "./mesh";
 import screen_quad_vert from "./shaders/screen_quad.vert?raw";
 import texture_frag from "./shaders/texture.frag?raw";
+import fxaa_frag from "./shaders/fxaa.frag?raw";
+
 import { Primitives } from "./primitives";
 
 
@@ -31,7 +33,7 @@ export class Renderer
 
     }
 
-    public create() : void 
+    public create(uCanvasDimensions : cml.UniformResource, uMousePosition : cml.UniformResource) : void 
     {
         this.primitives = Primitives.getInstance();
 
@@ -87,9 +89,6 @@ export class Renderer
             }
         );
     
-        let ssceneColorTexture = cml.createSamplerResource({name: "s_srcTexture", texture: sceneColorTexture, writeFrequency: cml.WriteFrequency.Dynamic, accessType: cml.ResourceAccessType.PerDrawCall});    
-
-
         let sceneColorAttachment1 : cml.FrameBufferAttachment = 
         {
             texture: sceneColorTexture,
@@ -111,9 +110,16 @@ export class Renderer
         this.sceneBuffer = cml.createFrameBuffer({attachments: [sceneColorAttachment1, meshIdColorAttachment, depthAttachment1], count: 3});
         this.sceneBuffer.drawAttachments();
 
+
+
+
+
+
+
+
         // Anti-alias color buffer
         //
-        let MSAATexture = cml.createTexture(
+        let FXAATexture = cml.createTexture(
             {
                 target: cml.TargetType.Texture2D,
                 nMipMaps: 0,
@@ -129,24 +135,35 @@ export class Renderer
             }
         );
     
-        let sMSAATexture = cml.createSamplerResource({name: "s_srcTexture", texture:MSAATexture, writeFrequency: cml.WriteFrequency.Dynamic, accessType: cml.ResourceAccessType.PerDrawCall});    
-
-
-        let MSAAColorAttachment1 : cml.FrameBufferAttachment = 
+        let FXAAColorAttachment : cml.FrameBufferAttachment = 
         {
-            texture: MSAATexture,
+            texture: FXAATexture,
             attachment: cml.Attachment.Color0
         }
 
-        this.downSampleBuffer = cml.createFrameBuffer({attachments: [MSAAColorAttachment1], count: 1});
+        this.fxaaBuffer = cml.createFrameBuffer({attachments: [FXAAColorAttachment], count: 1});
 
-        let displayQuadProgram = cml.createProgram({vertCode: screen_quad_vert, fragCode: texture_frag});
+
+
+
         let displayQuad_modelMatrix = glm.mat4.create();
         let displayQuad_uModelMatrix = cml.createUniformResource({name: "u_model", type: "Mat4x4f", data: new Float32Array(displayQuad_modelMatrix), accessType: cml.ResourceAccessType.PerDrawCall, writeFrequency: cml.WriteFrequency.Dynamic});
+        
+        let fxaaProgram = cml.createProgram({vertCode: screen_quad_vert, fragCode: texture_frag});
+        let sSceneColorTexture = cml.createSamplerResource({name: "s_srcTexture", texture: sceneColorTexture, writeFrequency: cml.WriteFrequency.Dynamic, accessType: cml.ResourceAccessType.PerDrawCall});    
+        this.fxaaShader = cml.createShader({program: fxaaProgram, resources: [displayQuad_uModelMatrix, sSceneColorTexture, uCanvasDimensions], count: 3});
+        
 
-        this.displayShader = cml.createShader({program: displayQuadProgram, resources: [displayQuad_uModelMatrix, ssceneColorTexture], count: 2});
 
-        this.antialiasShader = cml.createShader({program: displayQuadProgram, resources: [displayQuad_uModelMatrix, sMSAATexture], count: 2});
+
+
+
+        // MSAA Shader (handled by the framework when calling begin(null), 
+        // indicating that this is the final pass).
+        //
+        let displayQuadProgram = cml.createProgram({vertCode: screen_quad_vert, fragCode: texture_frag});
+        let sFXAAColorTexture = cml.createSamplerResource({name: "s_srcTexture", texture: FXAATexture, writeFrequency: cml.WriteFrequency.Dynamic, accessType: cml.ResourceAccessType.PerDrawCall});    
+        this.displayShader = cml.createShader({program: displayQuadProgram, resources: [displayQuad_uModelMatrix, sFXAAColorTexture], count: 2});
     }
 
     public render(scene : Scene, background : BackgroundMesh): void
@@ -163,11 +180,9 @@ export class Renderer
 
         cml.end();
 
-
-
-        cml.begin(this.downSampleBuffer);
+        cml.begin(this.fxaaBuffer);
         cml.setViewport({pixelWidth: window.innerWidth, pixelHeight: window.innerHeight});
-        cml.submit(this.primitives.fullScreenQuadInput, this.displayShader);
+        cml.submit(this.primitives.fullScreenQuadInput, this.fxaaShader);
         cml.end();
 
         cml.begin(null);
@@ -184,9 +199,9 @@ export class Renderer
 
         cml.end();
 
-        cml.begin(this.downSampleBuffer);
+        cml.begin(this.fxaaBuffer);
         cml.setViewport({pixelWidth: window.innerWidth, pixelHeight: window.innerHeight});
-        cml.submit(this.primitives.fullScreenQuadInput, this.displayShader);
+        cml.submit(this.primitives.fullScreenQuadInput, this.fxaaShader);
         cml.end();
 
         cml.begin(null);
@@ -200,8 +215,8 @@ export class Renderer
     }
 
     public sceneBuffer !: cml.FrameBuffer;
-    public downSampleBuffer !: cml.FrameBuffer;
-    public antialiasShader !: cml.Shader;
+    public fxaaBuffer !: cml.FrameBuffer;
+    public fxaaShader !: cml.Shader;
     public displayShader !: cml.Shader;
     public primitives !: Primitives;
     
