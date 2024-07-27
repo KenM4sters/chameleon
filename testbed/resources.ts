@@ -119,6 +119,11 @@ const sources : {name: string, type: string, path: string}[] =
         path: "testbed/images/mammoth.png",
         name: "mammoth",
         type: "LDR",
+    },
+    {
+        path: "testbed/images/background.png",
+        name: "water_normal_map",
+        type: "LDR",
     }
 ]
     

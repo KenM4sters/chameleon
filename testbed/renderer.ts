@@ -80,7 +80,7 @@ export class Renderer
 
         // Scene color buffer
         //
-        let sceneColorTexture = cml.createTexture(
+        this.sceneColorTexture = cml.createTexture(
             {
                 target: cml.TargetType.Texture2D,
                 nMipMaps: 0,
@@ -96,7 +96,7 @@ export class Renderer
             }
         );
 
-        let meshIdTexture = cml.createTexture(
+        this.meshIdTexture = cml.createTexture(
             {
                 target: cml.TargetType.Texture2D,
                 nMipMaps: 0,
@@ -114,7 +114,7 @@ export class Renderer
 
         // Scene depth buffer
         //
-        let sceneDepthTexture = cml.createTexture(
+        this.sceneDepthTexture = cml.createTexture(
             {
                 target: cml.TargetType.Texture2D,
                 nMipMaps: 0,
@@ -132,19 +132,19 @@ export class Renderer
     
         let sceneColorAttachment1 : cml.FrameBufferAttachment = 
         {
-            texture: sceneColorTexture,
+            texture: this.sceneColorTexture,
             attachment: cml.Attachment.Color0
         }
 
         let meshIdColorAttachment : cml.FrameBufferAttachment = 
         {
-            texture: meshIdTexture,
+            texture: this.meshIdTexture,
             attachment: cml.Attachment.Color1
         }
 
         let depthAttachment1 : cml.FrameBufferAttachment = 
         {
-            texture: sceneDepthTexture,
+            texture: this.sceneDepthTexture,
             attachment: cml.Attachment.DepthStencil
         }
 
@@ -156,7 +156,7 @@ export class Renderer
 
         // Anti-alias color buffer
         //
-        let FXAATexture = cml.createTexture(
+        this.FXAATexture = cml.createTexture(
             {
                 target: cml.TargetType.Texture2D,
                 nMipMaps: 0,
@@ -174,7 +174,7 @@ export class Renderer
     
         let FXAAColorAttachment : cml.FrameBufferAttachment = 
         {
-            texture: FXAATexture,
+            texture: this.FXAATexture,
             attachment: cml.Attachment.Color0
         }
 
@@ -186,7 +186,7 @@ export class Renderer
         
         
         let fxaaProgram = cml.createProgram({vertCode: screen_quad_vert, fragCode: texture_frag});
-        let sSceneColorTexture = cml.createSamplerResource({name: "s_srcTexture", texture: sceneColorTexture, writeFrequency: cml.WriteFrequency.Dynamic, accessType: cml.ResourceAccessType.PerDrawCall});    
+        let sSceneColorTexture = cml.createSamplerResource({name: "s_srcTexture", texture: this.sceneColorTexture, writeFrequency: cml.WriteFrequency.Dynamic, accessType: cml.ResourceAccessType.PerDrawCall});    
         this.fxaaShader = cml.createShader({program: fxaaProgram, resources: [displayQuad_uModelMatrix, sSceneColorTexture, uCanvasDimensions], count: 3});
         
 
@@ -194,7 +194,7 @@ export class Renderer
         // indicating that this is the final pass).
         //
         let displayQuadProgram = cml.createProgram({vertCode: screen_quad_vert, fragCode: texture_frag});
-        let sFXAAColorTexture = cml.createSamplerResource({name: "s_srcTexture", texture: FXAATexture, writeFrequency: cml.WriteFrequency.Dynamic, accessType: cml.ResourceAccessType.PerDrawCall});    
+        let sFXAAColorTexture = cml.createSamplerResource({name: "s_srcTexture", texture: this.FXAATexture, writeFrequency: cml.WriteFrequency.Dynamic, accessType: cml.ResourceAccessType.PerDrawCall});    
         this.displayShader = cml.createShader({program: displayQuadProgram, resources: [displayQuad_uModelMatrix, sFXAAColorTexture], count: 2});
     }
 
@@ -246,11 +246,21 @@ export class Renderer
         this.sceneBuffer.destroy();
     }
 
+    public resize(width : number, height : number) : void 
+    {
+        
+    }
+
 
     private vbo !: cml.VertexBuffer;
     private ebo !: cml.IndexBuffer;
     private layout !: cml.VertexLayout;
     private input !: cml.VertexInput;
+
+    private sceneColorTexture !: cml.Texture; 
+    private meshIdTexture !: cml.Texture; 
+    private sceneDepthTexture !: cml.Texture; 
+    private FXAATexture !: cml.Texture; 
 
     public linear_clamp_sampler !: cml.Sampler;
     public linear_nearest_sampler !: cml.Sampler;

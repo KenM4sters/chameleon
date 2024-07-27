@@ -221,6 +221,11 @@ export class ProjectsList
 
     } 
 
+    public resize(width : number, height : number) : void 
+    {
+        
+    }
+
     
     private meshes : ProjectMesh[];
     public cube_vbo !: cml.VertexBuffer;

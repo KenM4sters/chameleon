@@ -9,6 +9,13 @@ import { ProjectMesh, ProjectsList } from "./projects_list";
 import { Background } from "./background";
 
 
+export interface Camera 
+{
+    perspectiveCamera : cml.PerspectiveCamera;
+    uProjection : cml.UniformResource;
+    uView : cml.UniformResource;
+};
+
 export class Experience extends StateResponder
 {
     constructor() 
@@ -55,11 +62,18 @@ export class Experience extends StateResponder
 
         // View Frustum (maybe all of these should be part of the framework?).
         //
+        
         let camera = new cml.PerspectiveCamera([-10.0, 0.5, 8.0]);
         camera.target = [0.0, 0.0, 3.0];
         let uProjection = cml.createUniformResource({type: "Mat4x4f", data: new Float32Array(camera.GetProjectionMatrix(1.0, 1.0)), name: "u_projection", writeFrequency: cml.WriteFrequency.Dynamic, accessType: cml.ResourceAccessType.PerFrame});
         let uView = cml.createUniformResource({type: "Mat4x4f", data: new Float32Array(camera.GetViewMatrix()), name: "u_view", writeFrequency: cml.WriteFrequency.Dynamic, accessType: cml.ResourceAccessType.PerFrame});
 
+        this.camera = 
+        {
+            perspectiveCamera : camera,
+            uProjection : uProjection,
+            uView : uView
+        };
 
         this.renderer = new Renderer();
         this.renderer.create(this.uCanvasDimensions, this.uMousePosition);
@@ -77,6 +91,7 @@ export class Experience extends StateResponder
 
         // Listeners
         //
+        window.addEventListener("resize", () => this.respondToWindowResize());
         window.addEventListener("wheel", (e : WheelEvent) => this.respondToScroll(e));
         window.addEventListener("mousemove", (e : MouseEvent) => this.respondToMouseMove(e));
         window.addEventListener("click", (e : MouseEvent) => this.respondToMouseClick(e));
@@ -96,9 +111,9 @@ export class Experience extends StateResponder
             else 
             {
                 this.renderer.renderBackgroundOnly(this.background);
-            }
+            } 
 
-            this.run();
+            this.run();  
         });  
     }
 
@@ -213,6 +228,25 @@ export class Experience extends StateResponder
         }
     }
 
+    private respondToWindowResize() : void 
+    {
+        const new_width = window.innerWidth;
+        const new_height = window.innerHeight;
+
+        if(new_width != this.canvas.width || new_height != this.canvas.height) 
+        {
+            this.canvas.width = new_width;
+            this.canvas.height = new_height;
+        }
+
+        this.uCanvasDimensions.update(new Float32Array([new_width, new_height]));
+
+        cml.setViewport({pixelWidth: new_width, pixelHeight: new_height});
+
+        this.renderer.resize(new_width, new_height);
+        this.projectsList.resize(new_width, new_height);
+    }
+
     private handleViewChange(view : View) : void 
     {
     }
@@ -221,6 +255,8 @@ export class Experience extends StateResponder
     private uTime !: cml.UniformResource;
     private uMousePosition !: cml.UniformResource;
     private uCanvasDimensions !: cml.UniformResource;
+
+    private camera !: Camera;
     
     private canvas !: HTMLCanvasElement;
     private intersectedProject : ProjectID | null;

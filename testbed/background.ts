@@ -7,6 +7,7 @@ import background_frag from "./shaders/background.frag?raw";
 
 import { View } from "./portfolio";
 import { screen_quad_indices, screen_quad_vertices } from "./primitives";
+import { Resources } from "./resources";
 
 
 /**
@@ -50,13 +51,47 @@ export class Background extends StateResponder
         this.program = cml.createProgram({vertCode: background_vert, fragCode: background_frag});
 
 
+        let img = Resources.GetInstance().GetTexture("water_normal_map");
+
+        if(!img) 
+        {
+            throw new Error("Failed to get texture from Resources: water_normal_map");
+        } 
+
+
+        this.linear_repeat_sampler = cml.createSampler(
+        {
+            addressModeS: cml.SamplerAddressMode.Repeat,
+            addressModeT: cml.SamplerAddressMode.Repeat,
+            addressModeR: cml.SamplerAddressMode.Repeat,
+            minFilter: cml.SamplerFilterMode.Linear,
+            magFilter: cml.SamplerFilterMode.Linear
+        });
+
+        this.normal_texture = cml.createTexture(
+        {
+            target: cml.TargetType.Texture2D,
+            nMipMaps: 0,
+            level: 0,
+            internalFormat: cml.InternalFormat.RGBA32F,
+            format: cml.Format.RGBA,
+            type: cml.ValueType.Float,
+            usage: cml.Usage.ReadWrite,
+            sampler: this.linear_repeat_sampler,
+            width: window.innerWidth,
+            height: window.innerHeight,
+            data : img
+        });
+        
+
         this.modelMatrix = glm.mat4.create();
         glm.mat4.translate(this.modelMatrix, this.modelMatrix, [0, 0, 1.0]);
         this.uModelMatrix = cml.createUniformResource({name: "u_model", type: "Mat4x4f", data: new Float32Array(this.modelMatrix), accessType: cml.ResourceAccessType.PerDrawCall, writeFrequency: cml.WriteFrequency.Dynamic});
+        let sNormalMap = cml.createSamplerResource({name: "s_normalMap", texture: this.normal_texture, writeFrequency: cml.WriteFrequency.Dynamic, accessType: cml.ResourceAccessType.PerDrawCall});    
         this.uCurrentView = cml.createUniformResource({name: "u_currentView", type: "Float", data: 0.0, accessType: cml.ResourceAccessType.PerDrawCall, writeFrequency: cml.WriteFrequency.Dynamic});
 
 
-        this.shader = cml.createShader({program: this.program, resources: [this.uModelMatrix, uCanvasDimensions, uMousePosition, this.uCurrentView], count: 4});
+        this.shader = cml.createShader({program: this.program, resources: [sNormalMap, this.uModelMatrix, uCanvasDimensions, uMousePosition, this.uCurrentView], count: 5});
     }
 
 
@@ -84,6 +119,8 @@ export class Background extends StateResponder
     public input !: cml.VertexInput;
     public program !: cml.Program;
     public shader !: cml.Shader;
+    public normal_texture !: cml.Texture;
+    public linear_repeat_sampler !: cml.Sampler;
 
     public modelMatrix !: glm.mat4;
     public uModelMatrix !: cml.UniformResource;
