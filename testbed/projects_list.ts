@@ -43,7 +43,7 @@ export class ProjectMesh
         this.scale = props.scale;
 
 
-        let texture = cml.createTexture(
+        this.primary_texture = cml.createTexture(
             {
                 target: cml.TargetType.Texture2D,
                 nMipMaps: 0,
@@ -65,7 +65,7 @@ export class ProjectMesh
 
         this.uModelMatrix = cml.createUniformResource({name: "u_model", type: "Mat4x4f", data: new Float32Array(this.modelMatrix), accessType: cml.ResourceAccessType.PerDrawCall, writeFrequency: cml.WriteFrequency.Dynamic});
         this.uProjectId = cml.createUniformResource({name: "u_projectId", type: "Int", data: this.id, accessType: cml.ResourceAccessType.PerDrawCall, writeFrequency: cml.WriteFrequency.Dynamic});
-        this.sTexture = cml.createSamplerResource({name: "s_texture", texture: texture, accessType: cml.ResourceAccessType.PerDrawCall, writeFrequency: cml.WriteFrequency.Dynamic});
+        this.sTexture = cml.createSamplerResource({name: "s_texture", texture: this.primary_texture, accessType: cml.ResourceAccessType.PerDrawCall, writeFrequency: cml.WriteFrequency.Dynamic});
 
         this.shader = cml.createShader({program: props.program, resources: [this.sTexture, this.uProjectId, this.uModelMatrix, uProjection, uView], count: 5});
     }
@@ -75,13 +75,18 @@ export class ProjectMesh
 
     }
 
+    public resize(width : number, height : number) : void 
+    {
+        this.primary_texture.resize(width, height);
+    }
+
     public destroy() : void 
     {
-        this.texture.destroy();
+        this.primary_texture.destroy();
     }
 
 
-    public texture !: cml.Texture;
+    public primary_texture !: cml.Texture;  
     public shader !: cml.Shader;
     public uModelMatrix !: cml.UniformResource;
     public uProjectId !: cml.UniformResource;
@@ -223,7 +228,10 @@ export class ProjectsList
 
     public resize(width : number, height : number) : void 
     {
-        
+        this.meshes.forEach((mesh : ProjectMesh) => 
+        {
+            mesh.resize(width, height);
+        })
     }
 
     

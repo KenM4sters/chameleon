@@ -22,6 +22,7 @@ export class GLTexture extends Texture
         this.level = 0;
         this.usage = Usage.ReadWrite;
         this.isCube = false;
+        this.data = null;
     }
 
     public override create(props: TextureProps): void 
@@ -35,6 +36,7 @@ export class GLTexture extends Texture
         this.nMipMaps = props.nMipMaps;
         this.level = props.level;
         this.usage = props.usage;
+        this.data = props.data;
 
         this.sampler = props.sampler as GLSampler;
 
@@ -98,7 +100,50 @@ export class GLTexture extends Texture
 
     public override resize(width: number, height: number): void 
     {
+        this.width = width;
+        this.height = height;
+
+        gl.bindTexture(g_glTargetTypes[this.target], this.texture);
+        gl.bindSampler(0, this.sampler.getContextHandle());
         
+        if(this.target == TargetType.TextureCube) 
+        {
+            for(let i = 0; i < 6; i++) 
+            {
+                if(this.data instanceof HTMLImageElement) 
+                {
+                    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+                    gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X + i, this.level, g_glInternalFormats[this.internalFormat], g_glFormats[this.format], g_glValueTypes[this.type], this.data);
+                    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+                } 
+                else 
+                {
+                    gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X + i, this.level, g_glInternalFormats[this.internalFormat], this.width, this.height, 0, g_glFormats[this.format], g_glValueTypes[this.type], this.data);
+                }
+            }
+
+            this.isCube = true;
+        }
+        else 
+        {               
+            if(this.data instanceof HTMLImageElement) 
+            {
+                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+                gl.texImage2D(g_glTargetTypes[this.target], this.level, g_glInternalFormats[this.internalFormat], g_glFormats[this.format], g_glValueTypes[this.type], this.data);
+                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+            } 
+            else 
+            {
+                gl.texImage2D(g_glTargetTypes[this.target], this.level, g_glInternalFormats[this.internalFormat], this.width, this.height, 0, g_glFormats[this.format], g_glValueTypes[this.type], this.data);
+            }
+        }
+
+        if(this.nMipMaps > 0) 
+        {
+            gl.generateMipmap(g_glTargetTypes[this.target]);
+        }
+        
+        gl.bindTexture(g_glTargetTypes[this.target], null);
     }
 
     public getContextHandle() : WebGLTexture 
@@ -131,4 +176,5 @@ export class GLTexture extends Texture
     private usage : Usage;
     private sampler !: GLSampler;
     private isCube : boolean;
+    private data : ArrayBufferView | Float32Array | Uint16Array | HTMLImageElement | null;
 };

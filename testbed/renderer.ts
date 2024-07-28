@@ -40,6 +40,7 @@ export class Renderer
         this.vbo = cml.createVertexBuffer({data: new Float32Array(screen_quad_vertices), byteSize: screen_quad_vertices.length * 4});
         this.ebo = cml.createIndexBuffer({data: new Uint16Array(screen_quad_indices), byteSize: screen_quad_indices.length * 4});
 
+
         this.layout = new cml.VertexLayout(
             [
                 new cml.VertexAttribute("Position", cml.ValueType.Float, 3),
@@ -47,6 +48,7 @@ export class Renderer
             ], 
             2
         );
+
 
         this.input = cml.createVertexInput(
         {
@@ -75,6 +77,25 @@ export class Renderer
                 addressModeR: cml.SamplerAddressMode.ClampToEdge,
                 minFilter: cml.SamplerFilterMode.Nearest,
                 magFilter: cml.SamplerFilterMode.Nearest,
+            }
+        );
+
+
+        // Scene depth buffer
+        //
+        this.sceneDepthTexture = cml.createTexture(
+            {
+                target: cml.TargetType.Texture2D,
+                nMipMaps: 0,
+                level: 0,
+                internalFormat: cml.InternalFormat.Depth24Stencil8,
+                format: cml.Format.DepthStencil,
+                type: cml.ValueType.UInt24_8,
+                usage: cml.Usage.ReadWrite,
+                sampler: this.linear_clamp_sampler,
+                width: window.innerWidth * this.highResolutionFactor,
+                height: window.innerHeight * this.highResolutionFactor,
+                data : null
             }
         );
 
@@ -112,47 +133,50 @@ export class Renderer
             }
         );
 
-        // Scene depth buffer
-        //
-        this.sceneDepthTexture = cml.createTexture(
+        this.mesh_id_downsampled_texture = cml.createTexture(
             {
                 target: cml.TargetType.Texture2D,
                 nMipMaps: 0,
                 level: 0,
-                internalFormat: cml.InternalFormat.Depth24Stencil8,
-                format: cml.Format.DepthStencil,
-                type: cml.ValueType.UInt24_8,
+                internalFormat: cml.InternalFormat.RGBA32F,
+                format: cml.Format.RGBA,
+                type: cml.ValueType.Float,
                 usage: cml.Usage.ReadWrite,
-                sampler: this.linear_clamp_sampler,
-                width: window.innerWidth * this.highResolutionFactor,
-                height: window.innerHeight * this.highResolutionFactor,
+                sampler: this.linear_nearest_sampler,
+                width: window.innerWidth,
+                height: window.innerHeight,
                 data : null
             }
         );
-    
-        let sceneColorAttachment1 : cml.FrameBufferAttachment = 
-        {
-            texture: this.sceneColorTexture,
-            attachment: cml.Attachment.Color0
-        }
 
-        let meshIdColorAttachment : cml.FrameBufferAttachment = 
-        {
-            texture: this.meshIdTexture,
-            attachment: cml.Attachment.Color1
-        }
-
-        let depthAttachment1 : cml.FrameBufferAttachment = 
+        let depth_attachment : cml.FrameBufferAttachment = 
         {
             texture: this.sceneDepthTexture,
             attachment: cml.Attachment.DepthStencil
         }
 
-        this.sceneBuffer = cml.createFrameBuffer({attachments: [sceneColorAttachment1, meshIdColorAttachment, depthAttachment1], count: 3});
+        let scene_attachment : cml.FrameBufferAttachment = 
+        {
+            texture: this.sceneColorTexture,
+            attachment: cml.Attachment.Color0
+        }
+
+        let mesh_id_attachment : cml.FrameBufferAttachment = 
+        {
+            texture: this.meshIdTexture,
+            attachment: cml.Attachment.Color1
+        }
+
+        let mesh_id_downsampled_attachment : cml.FrameBufferAttachment = 
+        {
+            texture: this.mesh_id_downsampled_texture,
+            attachment: cml.Attachment.Color0
+        }
+
+        this.sceneBuffer = cml.createFrameBuffer({attachments: [scene_attachment, mesh_id_attachment, depth_attachment], count: 3});
         this.sceneBuffer.drawAttachments();
 
-
-
+        this.mesh_id_buffer = cml.createFrameBuffer({attachments: [mesh_id_attachment, depth_attachment], count: 2});
 
         // Anti-alias color buffer
         //
@@ -202,7 +226,7 @@ export class Renderer
     {
         cml.begin(this.sceneBuffer);
         cml.setViewport({pixelWidth: window.innerWidth * this.highResolutionFactor, pixelHeight: window.innerHeight * this.highResolutionFactor});
-
+ 
         projectsList.traverse((mesh : ProjectMesh) => 
         {
             cml.submit(projectsList.cube_input, mesh.shader);
@@ -231,6 +255,10 @@ export class Renderer
 
         cml.end();
 
+        // Downsampling the depth texture.
+        //
+        
+        
         cml.begin(this.fxaaBuffer);
         cml.setViewport({pixelWidth: window.innerWidth, pixelHeight: window.innerHeight});
         cml.submit(this.input, this.fxaaShader);
@@ -248,24 +276,31 @@ export class Renderer
 
     public resize(width : number, height : number) : void 
     {
-        
+        this.sceneColorTexture.resize(width, height);
+        this.meshIdTexture.resize(width, height);
+        this.sceneDepthTexture.resize(width, height);
+        this.FXAATexture.resize(width, height);
     }
-
 
     private vbo !: cml.VertexBuffer;
     private ebo !: cml.IndexBuffer;
     private layout !: cml.VertexLayout;
     private input !: cml.VertexInput;
+    
+    public linear_clamp_sampler !: cml.Sampler;
+    public linear_nearest_sampler !: cml.Sampler;
 
     private sceneColorTexture !: cml.Texture; 
     private meshIdTexture !: cml.Texture; 
+    private mesh_id_downsampled_texture !: cml.Texture;
     private sceneDepthTexture !: cml.Texture; 
     private FXAATexture !: cml.Texture; 
 
-    public linear_clamp_sampler !: cml.Sampler;
-    public linear_nearest_sampler !: cml.Sampler;
     public sceneBuffer !: cml.FrameBuffer;
+    public mesh_id_buffer !: cml.FrameBuffer;
     public fxaaBuffer !: cml.FrameBuffer;
+
+    public mesh_id_shader !: cml.Shader;
     public fxaaShader !: cml.Shader;
     public displayShader !: cml.Shader;
     
