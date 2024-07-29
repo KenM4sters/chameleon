@@ -37,6 +37,8 @@ export class Portfolio
     
         resources.LoadAllAssets(() => 
         {
+            console.log('ready');
+            
             experience.create();
             experience.run();
         });

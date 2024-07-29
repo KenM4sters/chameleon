@@ -133,22 +133,6 @@ export class Renderer
             }
         );
 
-        this.mesh_id_downsampled_texture = cml.createTexture(
-            {
-                target: cml.TargetType.Texture2D,
-                nMipMaps: 0,
-                level: 0,
-                internalFormat: cml.InternalFormat.RGBA32F,
-                format: cml.Format.RGBA,
-                type: cml.ValueType.Float,
-                usage: cml.Usage.ReadWrite,
-                sampler: this.linear_nearest_sampler,
-                width: window.innerWidth,
-                height: window.innerHeight,
-                data : null
-            }
-        );
-
         let depth_attachment : cml.FrameBufferAttachment = 
         {
             texture: this.sceneDepthTexture,
@@ -167,16 +151,8 @@ export class Renderer
             attachment: cml.Attachment.Color1
         }
 
-        let mesh_id_downsampled_attachment : cml.FrameBufferAttachment = 
-        {
-            texture: this.mesh_id_downsampled_texture,
-            attachment: cml.Attachment.Color0
-        }
-
         this.sceneBuffer = cml.createFrameBuffer({attachments: [scene_attachment, mesh_id_attachment, depth_attachment], count: 3});
         this.sceneBuffer.drawAttachments();
-
-        this.mesh_id_buffer = cml.createFrameBuffer({attachments: [mesh_id_attachment, depth_attachment], count: 2});
 
         // Anti-alias color buffer
         //
@@ -254,9 +230,6 @@ export class Renderer
         cml.submit(background.input, background.shader);
 
         cml.end();
-
-        // Downsampling the depth texture.
-        //
         
         
         cml.begin(this.fxaaBuffer);
@@ -276,9 +249,9 @@ export class Renderer
 
     public resize(width : number, height : number) : void 
     {
-        this.sceneColorTexture.resize(width, height);
-        this.meshIdTexture.resize(width, height);
-        this.sceneDepthTexture.resize(width, height);
+        this.sceneColorTexture.resize(width * this.highResolutionFactor, height * this.highResolutionFactor);
+        this.meshIdTexture.resize(width * this.highResolutionFactor, height * this.highResolutionFactor);
+        this.sceneDepthTexture.resize(width * this.highResolutionFactor, height * this.highResolutionFactor);
         this.FXAATexture.resize(width, height);
     }
 
@@ -292,17 +265,15 @@ export class Renderer
 
     private sceneColorTexture !: cml.Texture; 
     private meshIdTexture !: cml.Texture; 
-    private mesh_id_downsampled_texture !: cml.Texture;
     private sceneDepthTexture !: cml.Texture; 
     private FXAATexture !: cml.Texture; 
 
     public sceneBuffer !: cml.FrameBuffer;
-    public mesh_id_buffer !: cml.FrameBuffer;
     public fxaaBuffer !: cml.FrameBuffer;
 
     public mesh_id_shader !: cml.Shader;
     public fxaaShader !: cml.Shader;
     public displayShader !: cml.Shader;
     
-    private highResolutionFactor : number = 1.0;
+    public highResolutionFactor : number = 2.0;
 };

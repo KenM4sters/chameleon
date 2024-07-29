@@ -119,23 +119,20 @@ export class Experience extends StateResponder
 
     private respondToMouseMove(e : MouseEvent) : void
     {
+        let yPos = ((e.clientY - window.innerHeight) * -1) / window.innerHeight;
+        let xPos = e.clientX / window.innerWidth;
+        this.currentMousePosition = [xPos, yPos];  
+        this.uMousePosition.update(new Float32Array(this.currentMousePosition));
+        
+        const rect = this.canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        
         if(this.getCurrentView() == "home") 
         {
-            let yPos = ((e.clientY - window.innerHeight) * -1) / window.innerHeight;
-            let xPos = e.clientX / window.innerWidth;
-            this.currentMousePosition = [xPos, yPos];  
-            this.uMousePosition.update(new Float32Array(this.currentMousePosition));
-    
-            const rect = this.canvas.getBoundingClientRect();
-            const mouseX = e.clientX - rect.left;
-            const mouseY = e.clientY - rect.top;
-    
-            if(window.location.pathname == "/home") 
-            {
-                this.checkMouseProjectIntersection([mouseX, mouseY]);
-            }
+            this.checkMouseProjectIntersection([mouseX, mouseY]);
         }
-    }
+    }  
 
     private respondToMouseClick(e : MouseEvent) : void 
     {
@@ -205,9 +202,22 @@ export class Experience extends StateResponder
     {
         const pixel = new Float32Array(4);
 
-        this.renderer.sceneBuffer.readPixels(cml.Attachment.Color1, mousePosition[0], this.canvas.height - mousePosition[1], 1, 1, cml.Format.RGBA, cml.ValueType.Float, pixel);
+
+        // The texture containing the ids of each mesh is supersampled along with the
+        // scene texture (for antialiazing purposes), so instead of wasting GPU computation time
+        // and downscaling the texture, we'll just scale our mouse coordinates by the same factor.
+        //
+        const pos_x = mousePosition[0] * this.renderer.highResolutionFactor;
         
+        
+        const pos_y = (this.canvas.height - mousePosition[1]) * this.renderer.highResolutionFactor;
+
+
+        this.renderer.sceneBuffer.readPixels(cml.Attachment.Color1, pos_x, pos_y, 1, 1, cml.Format.RGBA, cml.ValueType.Float, pixel);
+        
+
         const app = document.getElementById("app") as HTMLElement;        
+
 
         if(pixel[0] < ProjectID.count) 
         {

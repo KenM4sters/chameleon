@@ -337,7 +337,7 @@ p
 
 .project_description_container 
 {
-  width: 20vw;
+  width: 25vw;
   z-index: 100;
   margin-left: 2vw;
   display: flex;
@@ -372,7 +372,10 @@ p
 {
   width: 70vw;
   height: 70vh;
-  opacity: 0.7;
+  opacity: 0.6;
+  filter: brightness(0.8);
+  border-radius: 15px;
+  box-shadow: 0px 0px 10px rgb(28, 25, 35);
 }
 
 .project_extras_container 
@@ -421,9 +424,11 @@ p
 
 .project_extra_image 
 {
-  width: 60vw;
-  height: 70vh;
+  width: 50vw;
+  height: 40vw;
   opacity: 0;
+  border-radius: 15px;
+  box-shadow: 0px 0px 10px rgb(28, 25, 35);
 }
 
 .project_extra_image.fade_in 
@@ -436,6 +441,8 @@ p
   width: 60vw;
   height: 60vh;
   opacity: 0.0;
+  border-radius: 15px;
+  box-shadow: 0px 0px 10px rgb(28, 25, 35);
 }
 
 .project_extra_image_final.fade_in 
@@ -448,13 +455,25 @@ p
   width: 60vw;
   display: flex;
   justify-content: center;
-  column-gap: 0vw;
+  column-gap: 1vw;
+}
+
+.project_extra_image_collage 
+{
+  display: flex;
+  justify-content: center;
+  place-items: center;
+  flex-direction: column;
+  row-gap: 2vh;
+  padding-bottom: 20vh;
 }
 
 .project_extra_double_image_final 
 {
   width: 30vw;
   opacity: 0;
+  border-radius: 15px;
+  box-shadow: 0px 0px 10px rgb(19, 17, 23);
 }
 
 .project_extra_double_image_final.fade_in 
@@ -467,29 +486,13 @@ p
   position: relative;
 }
 
-.project_extra_image_next
+.project_extra_final
 {
-  width: 60vw;
-  height: 60vh;
-}
-
-.next_project_button 
-{
-  width: 15vw;
-  height: 7vh;
-  border-radius: 15px;
-  border: none;
-  position: absolute;
-  left: 22.5vw;
-  top: 10vh;
-  background-color: rgba(255, 255, 255, 0.251);
-  transition: all;
-  transition-duration: 0.5s;
-}
-
-.next_project_button:hover 
-{
-  background-color: red;
-  color: white;
-  cursor: pointer;
+  width: 30vw;
+  height: 30vh;
+  display: flex;
+  justify-content: space-between;
+  place-items: start;
+  flex-direction: row;
+  column-gap: 5vw;
 }

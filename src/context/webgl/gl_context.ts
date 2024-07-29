@@ -9,7 +9,6 @@ import { GLSamplerResource, GLUniformResource } from "./gl_resource";
 import { GLTexture } from "./gl_texture";
 import { GLSampler } from "./gl_sampler";
 import { GLFrameBuffer } from "./gl_framebuffer";
-import MeshSSSNodeMaterial from "three/examples/jsm/nodes/materials/MeshSSSNodeMaterial.js";
 
 
 let canvas : HTMLCanvasElement;
@@ -323,5 +322,4 @@ export {
     g_glAttachments, 
     g_glValueTypes, 
 };
-
 

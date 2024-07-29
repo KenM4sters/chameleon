@@ -1,4 +1,4 @@
-import { FrameBufferProps, GraphicsSettings, IndexBufferProps, ProgramProps, SamplerProps, ShaderProps, TextureProps, TextureResourceProps, UniformBufferProps, UniformResourceProps, ResourceType, VertexBufferProps, VertexData, VertexInputProps, ResourceAccessType, WriteFrequency, Attachment, Format, ValueType } from "../../graphics";
+import { FrameBufferProps, GraphicsSettings, IndexBufferProps, ProgramProps, SamplerProps, ShaderProps, TextureProps, TextureResourceProps, UniformBufferProps, UniformResourceProps, ResourceType, VertexBufferProps, VertexData, VertexInputProps, ResourceAccessType, WriteFrequency, Attachment, Format, ValueType, SamplerFilterMode } from "../../graphics";
 
 
 /**
@@ -108,6 +108,12 @@ export abstract class FrameBuffer
     public abstract drawAttachments() : void;
 
     public abstract readPixels(attachment : Attachment, x : number, y : number, width: number, height : number, format : Format, type : ValueType, buffer : Float32Array) : void;
+
+    public abstract blit(
+        srcOffsetX : number, srcOffsetY : number, srcWidth : number, srcHeight : 
+        number, dstOffsetX : number, dstOffsetY : number, dstWidth : number, dstHeight : number, 
+        filter : SamplerFilterMode, texture : Texture
+    ) : void;
 
     public abstract clear() : void;
 

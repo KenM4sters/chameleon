@@ -160,18 +160,18 @@ export class ProjectsList
         //
         let projectMeshes : ProjectMeshProps[] = 
         [
-            {id: ProjectID.mammoth,         label: "mammoth",           translation: [0.0, 0.0, 0.0], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.silverback,      label: "mammoth",           translation: [0.0, 0.0, 0.6], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.wgpu,            label: "mammoth",           translation: [0.0, 0.0, 1.2], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.chameleon,       label: "chameleon_marbles", translation: [0.0, 0.0, 1.8], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.pbr,             label: "pbr_metal",         translation: [0.0, 0.0, 2.4], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.sandbox,         label: "sandbox",           translation: [0.0, 1.0, 3.0], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.vulkanLights,    label: "vulkan_lights",     translation: [0.0, 0.0, 3.6], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.raytracer,       label: "raytracer",         translation: [0.0, 0.0, 4.2], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.shmup,           label: "shmup",             translation: [0.0, 0.0, 4.8], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.bankingApp,      label: "mammoth",           translation: [0.0, 0.0, 5.4], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.gamesList,       label: "games_list",        translation: [0.0, 0.0, 6.0], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.actixWeb,        label: "mammoth",           translation: [0.0, 0.0, 6.6], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler}
+            {id: ProjectID.mammoth,         label: "mammoth_1",           translation: [0.0, 0.0, 0.0], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.silverback,      label: "silverback_1",           translation: [0.0, 0.0, 0.6], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.wgpu,            label: "wgpu_1",           translation: [0.0, 0.0, 1.2], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.chameleon,       label: "chameleon_1", translation: [0.0, 0.0, 1.8], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.pbr,             label: "pbr_1",         translation: [0.0, 0.0, 2.4], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.sandbox,         label: "sandbox_1",           translation: [0.0, 1.0, 3.0], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.vulkanLights,    label: "vulkan_lights_1",     translation: [0.0, 0.0, 3.6], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.raytracer,       label: "raytracer_1",         translation: [0.0, 0.0, 4.2], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.shmup,           label: "shmup_1",             translation: [0.0, 0.0, 4.8], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.bankingApp,      label: "banking_app_1",           translation: [0.0, 0.0, 5.4], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.gamesList,       label: "games_list_1",        translation: [0.0, 0.0, 6.0], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.actixWeb,        label: "actix_web_1",           translation: [0.0, 0.0, 6.6], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler}
         ];
 
 

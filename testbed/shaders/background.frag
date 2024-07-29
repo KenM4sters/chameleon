@@ -17,11 +17,15 @@ uniform float u_currentView;
 
 void main()
 {
-	// vec3 N = normalize(vec3(0.0, 0.0, 1.0));
-	vec3 N = texture(s_normalMap, v_uv).rgb;
+
+	vec2 mouse_position_clip_space = vec2(u_mousePosition.x * 2.0 - 1.0, u_mousePosition.y * 2.0 - 1.0);
+
+
+
+	vec3 N = normalize(vec3(0.0, 0.0, 1.0));
 	
-	vec3 light_pos = vec3(0.0, 0.0, 0.0);
-	vec3 light_color = vec3(1.0, 1.0, 1.0);
+	vec3 light_pos = vec3(0.0, 0.0, 0.5);
+	vec3 light_color = vec3(0.1, 0.1, 0.31);
 
 	vec3 light_dir = v_clipPosition - light_pos;
 

@@ -38,7 +38,7 @@ export class Router extends StateResponder
         
         window.addEventListener("popstate", (event) => 
         {
-            this.handleNavigation(event.state ? event.state.path : "home");
+            this.triggerViewChange(event.state ? event.state.path : "home")
         });
     }
 
