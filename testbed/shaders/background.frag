@@ -20,8 +20,6 @@ void main()
 
 	vec2 mouse_position_clip_space = vec2(u_mousePosition.x * 2.0 - 1.0, u_mousePosition.y * 2.0 - 1.0);
 
-
-
 	vec3 N = normalize(vec3(0.0, 0.0, 1.0));
 	
 	vec3 light_pos = vec3(0.0, 0.0, 0.5);
@@ -35,7 +33,7 @@ void main()
 
 	float attenuation = 1.0 / (light_distance * light_distance);
 
-	vec3 albedo = vec3(mix(vec3(0.1, 0.1, 0.3), vec3(0.1, 0.1, 0.15), u_currentView));
+	vec3 albedo = vec3(mix(vec3(0.1, 0.1, 0.25), vec3(0.1, 0.1, 0.15), 0.0));
 
 	albedo += light_color * light_angle * attenuation * LIGHT_INTENSITY;
 

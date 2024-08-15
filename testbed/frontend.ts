@@ -145,6 +145,7 @@ export class Frontend extends StateResponder
 
         this.homeLink.classList.add("active");
         this.aboutLink.classList.remove("active");
+        this.aboutLink.classList.remove("expanded");
     }   
 
     private setForAbout() : void 
@@ -164,6 +165,7 @@ export class Frontend extends StateResponder
         this.app.style.cursor = "default";
 
         this.aboutLink.classList.remove("active");
+        this.aboutLink.classList.remove("expanded");
         this.homeLink.classList.remove("active");
     }
 

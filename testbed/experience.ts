@@ -63,7 +63,7 @@ export class Experience extends StateResponder
         // View Frustum (maybe all of these should be part of the framework?).
         //
         
-        let camera = new cml.PerspectiveCamera([-10.0, 0.5, 8.0]);
+        let camera = new cml.PerspectiveCamera([0.0, 0.0, 20.0]);
         camera.target = [0.0, 0.0, 3.0];
         let uProjection = cml.createUniformResource({type: "Mat4x4f", data: new Float32Array(camera.GetProjectionMatrix(1.0, 1.0)), name: "u_projection", writeFrequency: cml.WriteFrequency.Dynamic, accessType: cml.ResourceAccessType.PerFrame});
         let uView = cml.createUniformResource({type: "Mat4x4f", data: new Float32Array(camera.GetViewMatrix()), name: "u_view", writeFrequency: cml.WriteFrequency.Dynamic, accessType: cml.ResourceAccessType.PerFrame});
@@ -92,7 +92,7 @@ export class Experience extends StateResponder
         // Listeners
         //
         window.addEventListener("resize", () => this.respondToWindowResize());
-        window.addEventListener("wheel", (e : WheelEvent) => this.respondToScroll(e));
+        // window.addEventListener("wheel", (e : WheelEvent) => this.respondToScroll(e));
         window.addEventListener("mousemove", (e : MouseEvent) => this.respondToMouseMove(e));
         window.addEventListener("click", (e : MouseEvent) => this.respondToMouseClick(e));
         window.addEventListener("close", () => {});
