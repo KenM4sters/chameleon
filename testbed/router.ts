@@ -15,7 +15,9 @@ export let g_routes : View[] =
     "shmup",
     "bankingApp",
     "gamesList",
-    "actixWeb"
+    "actixWeb",
+    "gravitySimulator",
+    "primeNumbers",
 ];
 
 export class Router extends StateResponder
@@ -56,10 +58,18 @@ export class Router extends StateResponder
     public handleNavigation(view : View) : void 
     {
         // Hide all sections
-        document.querySelectorAll(".content_section").forEach((section) => 
+        let elements = document.querySelectorAll(".content_section");
+        elements.forEach((section) => 
         {
-            section.classList.remove("active");            
+            if(section.id != view) 
+            {                                     
+                section.classList.remove("fade_in");                                     
+                section.classList.add("fade_out");                                     
+                section.classList.remove("active");                                     
+            }
         });
+    
+
 
         // Show the target section
         const targetSection = document.getElementById(view);
@@ -67,7 +77,8 @@ export class Router extends StateResponder
         if(targetSection) 
         {
             targetSection.classList.add("active");       
-            targetSection.classList.add("fade_in");       
+            targetSection.classList.remove("fade_out");       
+            targetSection.classList.add("fade_in");                  
         } 
         else 
         {

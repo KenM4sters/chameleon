@@ -51,11 +51,11 @@ export class Background extends StateResponder
         this.program = cml.createProgram({vertCode: background_vert, fragCode: background_frag});
 
 
-        let img = Resources.GetInstance().GetTexture("mammoth_1");
+        let img = Resources.GetInstance().GetTexture("background_1");
 
         if(!img) 
         {
-            throw new Error("Failed to get texture from Resources: mammoth_1");
+            throw new Error("Failed to get texture from Resources: background_1");
         } 
 
 

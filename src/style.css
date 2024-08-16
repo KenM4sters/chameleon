@@ -35,6 +35,11 @@ p
   animation: fadeIn 1.0s
 }
 
+.fade_out
+{
+  animation: fadeIn 1.0s reverse
+}
+
 
 .webgl_wrapper
 {
@@ -199,7 +204,7 @@ p
 {
   width: 100vw;
   height: 100vh;
-  background-color: black;
+  background-color: rgb(124, 29, 29);
 
 }
 
@@ -259,7 +264,6 @@ p
 
 .project_wrapper 
 {
-  background-color: orange;
 }
 
 .project_container 

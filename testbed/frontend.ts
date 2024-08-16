@@ -123,8 +123,8 @@ export class Frontend extends StateResponder
         const elements = document.querySelectorAll(".scroll_trigger_fade_in");
             
         elements.forEach(element => 
-        {
-            if (element.classList.contains('fade_in')) 
+        {            
+            if(element.classList.contains('fade_in')) 
             {
                 element.classList.remove("fade_in");
             }

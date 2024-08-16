@@ -18,7 +18,9 @@ export type View =
     | "shmup"
     | "bankingApp"
     | "gamesList"
-    | "actixWeb";
+    | "actixWeb"
+    | "gravitySimulator"
+    | "primeNumbers";
 
 
 

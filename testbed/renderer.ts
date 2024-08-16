@@ -22,6 +22,8 @@ export enum ProjectID
     bankingApp,
     gamesList,
     actixWeb,
+    gravitySimulator,
+    primeNumbers,
     count
 };
 

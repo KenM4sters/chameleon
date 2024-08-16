@@ -41,7 +41,7 @@ export class PerspectiveCamera
      */
     public GetProjectionMatrix(width : number, height : number) : glm.mat4 
     {
-        return glm.mat4.perspective(glm.mat4.create(), glm.glMatrix.toRadian(this.zoom) ,width / height, this.near, this.far); 
+        return glm.mat4.perspective(glm.mat4.create(), glm.glMatrix.toRadian(this.zoom), width / height, this.near, this.far); 
     }
     
     /**

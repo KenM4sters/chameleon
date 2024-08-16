@@ -421,5 +421,20 @@ const sources : {name: string, type: string, path: string}[] =
         type: "LDR",
         path: "testbed/images/actix_web/actix_web_6.png"
     },
+    {
+        name : "gravity_simulator_1",
+        type: "LDR",
+        path: "testbed/images/gravity_simulator/gravity_simulator_1.png"
+    },
+    {
+        name : "prime_numbers_1",
+        type: "LDR",
+        path: "testbed/images/prime_numbers/prime_numbers_1.png"
+    },
+    {
+        name : "background_1",
+        type: "LDR",
+        path: "testbed/images/background/water_normals.jpg"
+    },
 ]
     

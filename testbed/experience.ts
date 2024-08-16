@@ -63,8 +63,8 @@ export class Experience extends StateResponder
         // View Frustum (maybe all of these should be part of the framework?).
         //
         
-        let camera = new cml.PerspectiveCamera([0.0, 0.0, 20.0]);
-        camera.target = [0.0, 0.0, 3.0];
+        let camera = new cml.PerspectiveCamera([0.0, 0.0, 25.0]);
+        camera.target = [0.0, 0.0, 0.0];
         let uProjection = cml.createUniformResource({type: "Mat4x4f", data: new Float32Array(camera.GetProjectionMatrix(1.0, 1.0)), name: "u_projection", writeFrequency: cml.WriteFrequency.Dynamic, accessType: cml.ResourceAccessType.PerFrame});
         let uView = cml.createUniformResource({type: "Mat4x4f", data: new Float32Array(camera.GetViewMatrix()), name: "u_view", writeFrequency: cml.WriteFrequency.Dynamic, accessType: cml.ResourceAccessType.PerFrame});
 
@@ -119,8 +119,8 @@ export class Experience extends StateResponder
 
     private respondToMouseMove(e : MouseEvent) : void
     {
-        let yPos = ((e.clientY - window.innerHeight) * -1) / window.innerHeight;
-        let xPos = e.clientX / window.innerWidth;
+        let yPos = ((e.clientY - this.canvas.height) * -1) / this.canvas.height;
+        let xPos = e.clientX / this.canvas.width;
         this.currentMousePosition = [xPos, yPos];  
         this.uMousePosition.update(new Float32Array(this.currentMousePosition));
         
@@ -131,7 +131,41 @@ export class Experience extends StateResponder
         if(this.getCurrentView() == "home") 
         {
             this.checkMouseProjectIntersection([mouseX, mouseY]);
-        }
+        }   
+
+        let clip_space_mouse_position = glm.vec2.create();
+
+        clip_space_mouse_position[0] = xPos * 2 - 1;
+        clip_space_mouse_position[1] = yPos * 2 - 1;
+        
+        let clip_pos = glm.vec4.fromValues(clip_space_mouse_position[0], clip_space_mouse_position[1], -1.0, 1.0);
+
+        let inverse_projection = glm.mat4.invert(glm.mat4.create(), this.camera.perspectiveCamera.GetProjectionMatrix(this.canvas.width, this.canvas.height));
+
+        let view_space = glm.vec4.transformMat4(glm.vec4.create(), clip_pos, inverse_projection);
+
+        let inverse_view = glm.mat4.invert(glm.mat4.create(), this.camera.perspectiveCamera.GetViewMatrix());
+
+        let model_space = glm.vec4.transformMat4(glm.vec4.create(), view_space, inverse_view);
+
+        glm.vec4.scale(model_space, model_space, 1 / model_space[3]);
+        
+        console.log(model_space);
+
+        this.projectsList.traverse((project) => {
+            let target_mouse_matrix = glm.mat4.targetTo(
+                glm.mat4.create(), 
+                project.position, 
+                glm.vec3.fromValues(model_space[0], model_space[1], -4.0), 
+                glm.vec3.fromValues(0, 1, 0)
+            );
+
+            project.modelMatrix = glm.mat4.create();
+            glm.mat4.translate(project.modelMatrix, project.modelMatrix, project.position);
+            glm.mat4.multiply(project.modelMatrix, project.modelMatrix, target_mouse_matrix);
+            glm.mat4.scale(project.modelMatrix, project.modelMatrix, project.scale);
+            project.uModelMatrix.update(new Float32Array(project.modelMatrix));
+        })
     }  
 
     private respondToMouseClick(e : MouseEvent) : void 
@@ -142,29 +176,11 @@ export class Experience extends StateResponder
             {
                 this.selectedProject = this.intersectedProject;
                 
-                const selectedMesh = this.projectsList.getMesh(this.selectedProject);
-                
-                
-                if(selectedMesh.position[2] <= 3.1 && selectedMesh.position[2] >= 2.9) 
-                {
-                    this.triggerViewChange(g_routes[this.intersectedProject]);
+                const selectedMesh = this.projectsList.getMesh(this.selectedProject);   
+                 
+                this.triggerViewChange(g_routes[this.intersectedProject]);
 
-                    this.intersectedProject = null;
-                } 
-                else 
-                {
-                    const difference = 3.0 - selectedMesh.position[2];
-    
-                    this.projectsList.traverse((mesh : ProjectMesh) => 
-                    {
-                        mesh.position[2] += difference;
-                        mesh.modelMatrix = glm.mat4.create();
-                        glm.mat4.translate(mesh.modelMatrix, mesh.modelMatrix, mesh.position);
-                        glm.mat4.scale(mesh.modelMatrix, mesh.modelMatrix, mesh.scale);
-    
-                        mesh.uModelMatrix.update(new Float32Array(mesh.modelMatrix));
-                    });
-                }
+                this.intersectedProject = null;
             } 
         }
     }
