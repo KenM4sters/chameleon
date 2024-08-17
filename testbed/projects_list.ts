@@ -64,10 +64,11 @@ export class ProjectMesh
         glm.mat4.scale(this.modelMatrix, this.modelMatrix, this.scale);
 
         this.uModelMatrix = cml.createUniformResource({name: "u_model", type: "Mat4x4f", data: new Float32Array(this.modelMatrix), accessType: cml.ResourceAccessType.PerDrawCall, writeFrequency: cml.WriteFrequency.Dynamic});
+        this.uIsIntersected = cml.createUniformResource({name: "u_isIntersected", type: "Int", data: this.isIntersected, accessType: cml.ResourceAccessType.PerDrawCall, writeFrequency: cml.WriteFrequency.Dynamic});
         this.uProjectId = cml.createUniformResource({name: "u_projectId", type: "Int", data: this.id, accessType: cml.ResourceAccessType.PerDrawCall, writeFrequency: cml.WriteFrequency.Dynamic});
         this.sTexture = cml.createSamplerResource({name: "s_texture", texture: this.primary_texture, accessType: cml.ResourceAccessType.PerDrawCall, writeFrequency: cml.WriteFrequency.Dynamic});
 
-        this.shader = cml.createShader({program: props.program, resources: [this.sTexture, this.uProjectId, this.uModelMatrix, uProjection, uView], count: 5});
+        this.shader = cml.createShader({program: props.program, resources: [this.sTexture, this.uProjectId, this.uModelMatrix, this.uIsIntersected, uProjection, uView], count: 6});
     }
 
     public select() : void 
@@ -89,9 +90,11 @@ export class ProjectMesh
     public primary_texture !: cml.Texture;  
     public shader !: cml.Shader;
     public uModelMatrix !: cml.UniformResource;
+    public uIsIntersected !: cml.UniformResource;
     public uProjectId !: cml.UniformResource;
     public sTexture !: cml.SamplerResource;
     public modelMatrix !: glm.mat4;
+    public isIntersected !: number;
 
     public position : glm.vec3;
     public scale : glm.vec3;
@@ -109,6 +112,8 @@ export class ProjectsList
     constructor() 
     {
         this.meshes = [];
+        this.project_positions = [];
+        this.current_angle = 0;
     }
 
     public create(uProjection : cml.UniformResource, uView : cml.UniformResource) : void 
@@ -156,24 +161,37 @@ export class ProjectsList
         );
 
 
+        let division = (Math.PI * 2) / ProjectID.count;
+
+        for(let i = 0; i < ProjectID.count; i++) 
+        {
+            const angle = division * i;
+
+            const x_pos = Math.cos(angle) * 5.0;
+            const y_pos = 0;
+            const z_pos = Math.sin(angle) * 5.0;
+
+            this.project_positions.push(glm.vec3.fromValues(x_pos, y_pos, z_pos));
+        }
+
         // Projects
         //
         let projectMeshes : ProjectMeshProps[] = 
         [
-            {id: ProjectID.wgpu,            label: "wgpu_1",           translation: [-3.0, 3.0, 0.0], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.actixWeb,        label: "actix_web_1",           translation: [-1.0, 3.0, 0.0], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.mammoth,         label: "mammoth_1",           translation: [1.0, 3.0, 0.0], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.silverback,      label: "silverback_1",           translation: [3.0, 3.0, 0.0], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.pbr,             label: "pbr_1",         translation: [-3.0, 0.0, 0.0], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.sandbox,         label: "sandbox_1",           translation: [-1.0, 0.0, 0.0], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.vulkanLights,    label: "vulkan_lights_1",     translation: [1.0, 0.0, 0.0], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.raytracer,       label: "raytracer_1",         translation: [3.0, 0.0, 0.0], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.shmup,           label: "shmup_1",             translation: [-3.0, -3.0, 0.0], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.chameleon,       label: "chameleon_1", translation: [-1.0, -3.0, 0.0], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.bankingApp,      label: "banking_app_1",           translation: [1.0, -3.0, 0.0], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.gamesList,       label: "games_list_1",        translation: [3.0, -3.0, 0.0], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            // {id: ProjectID.gravitySimulator,label: "gravity_simulator_1",        translation: [0.0, 0.0, 0.0], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            // {id: ProjectID.primeNumbers,    label: "prime_numbers_1",        translation: [4.0, 0.0, 0.0], scale: [0.8, 0.8, 0.04], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.wgpu,            label: "wgpu_1",           translation:this.project_positions[0], scale: [0.8, 1.0, 0.08], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.actixWeb,        label: "actix_web_1",           translation:this.project_positions[1], scale: [0.8, 1.0, 0.08], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.mammoth,         label: "mammoth_1",           translation: this.project_positions[2], scale: [0.8, 1.0, 0.08], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.silverback,      label: "silverback_1",           translation: this.project_positions[3], scale: [0.8, 1.0, 0.08], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.pbr,             label: "pbr_1",         translation:this.project_positions[4], scale: [0.8, 1.0, 0.08], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.sandbox,         label: "sandbox_1",           translation:this.project_positions[5], scale: [0.8, 1.0, 0.08], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.vulkanLights,    label: "vulkan_lights_1",     translation: this.project_positions[6], scale: [0.8, 1.0, 0.08], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.raytracer,       label: "raytracer_1",         translation: this.project_positions[7], scale: [0.8, 1.0, 0.08], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.shmup,           label: "shmup_1",             translation: this.project_positions[8], scale: [0.8, 1.0, 0.08], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.chameleon,       label: "chameleon_1", translation: this.project_positions[9], scale: [0.8, 1.0, 0.08], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.bankingApp,      label: "banking_app_1",           translation: this.project_positions[10], scale: [0.8, 1.0, 0.08], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.gamesList,       label: "games_list_1",        translation: this.project_positions[11], scale: [0.8, 1.0, 0.08], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.gravitySimulator,label: "gravity_simulator_1",        translation: this.project_positions[12], scale: [0.8, 1.0, 0.08], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.primeNumbers,    label: "prime_numbers_1",        translation: this.project_positions[13], scale: [0.8, 1.0, 0.08], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
         ];
 
 
@@ -195,6 +213,34 @@ export class ProjectsList
 
             this.addMesh(mesh);
         });
+    }
+
+    public update(e: WheelEvent) : void {
+        let delta = e.deltaY * 0.001;
+
+        this.current_angle += delta;
+
+        let angle_between_cubes = ((Math.PI * 2) / ProjectID.count);
+
+        let i = 0;
+        this.traverse((mesh: ProjectMesh) => {
+            let angle = this.current_angle + i * angle_between_cubes;
+
+            let x = 5.0 * Math.cos(angle);
+            let y = 0;
+            let z = 5.0 * Math.sin(angle);
+    
+            // Set the position of the cube
+            mesh.position = [x, y, z];
+                
+            mesh.modelMatrix = glm.mat4.create();
+            glm.mat4.translate(mesh.modelMatrix, mesh.modelMatrix, mesh.position);
+            glm.mat4.scale(mesh.modelMatrix, mesh.modelMatrix, mesh.scale);
+    
+            mesh.uModelMatrix.update(new Float32Array(mesh.modelMatrix));
+
+            i++;
+        })
     }
 
     public getMesh(id : ProjectID) : ProjectMesh 
@@ -244,4 +290,7 @@ export class ProjectsList
     public cube_input !: cml.VertexInput;
     public project_program !: cml.Program;
     public cube_sampler !: cml.Sampler;
+
+    private project_positions !: glm.vec3[];
+    private current_angle !: number;
 };

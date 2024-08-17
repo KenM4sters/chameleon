@@ -8,6 +8,7 @@ in vec2 v_uv;
 in vec3 v_clipPosition;
 
 uniform int u_projectId;
+uniform int u_isIntersected;
 uniform sampler2D s_srcTexture;
 
 
@@ -23,6 +24,11 @@ void main()
     {
         scene_color = vec4(texture(s_srcTexture, v_uv).rgb, 1.0);
     };
+
+    if(u_isIntersected > 0) 
+    {
+        scene_color.xyz += vec3(0.05); 
+    }
 
     mesh_id_color = vec4(u_projectId, 0.0, 0.0, 0.0);
 }

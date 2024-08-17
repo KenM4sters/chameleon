@@ -22,11 +22,11 @@ p
 @keyframes fadeIn {
   from {
       opacity: 0;
-      scale: 0.95;
+      /* scale: 0.95; */
   }
   to {
       opacity: 1;
-      scale: 1.0;
+      /* scale: 1.0; */
   }
 }
 
@@ -100,14 +100,13 @@ p
 
 .header_name 
 {
-  color: rgb(228, 228, 228);
+  color: rgb(200, 200, 200);
   font-size: calc(0.5vh + 0.6rem);
-
 }
 
 .header_links 
 {
-  color: rgb(235, 235, 235);
+  color: rgb(210, 209, 209);
   display: flex;
   justify-content: center;
   place-items: center;
@@ -148,7 +147,7 @@ p
 .header_navbar_item 
 {
   text-decoration: none;
-  color: rgb(232, 230, 230);
+  color: rgb(209, 209, 209);
   font-size: calc(0.5vh + 0.6rem);
 }
 
@@ -180,31 +179,62 @@ p
 {
   width: 100vw;
   height: 100vh;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  place-items: center;
 }
 
 .home_title_container 
 {
   width: 100vw;
   height: 20vh;
-  margin-top: 75vh;
+  margin-top: 70vh;
   margin-left: 3vw;
-  position: relative;
+  position: absolute;
 }
 
 .home_title_container h1
 {
-  top: 70%;
+  top: 95%;
   position: absolute;
-  color: rgb(224, 229, 235);
+  color: rgb(201, 206, 211);
   font-weight: 300;
   font-size: calc(0.5vh + 0.6rem);
+}
+
+.projects_list {
+  margin-top: 10vh;
+  width: 50vw;
+  height: 50vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  place-items: center;
+}
+
+.projects_list_title {
+  width: 7vw;
+  height: 5vh;
+  display: flex;
+  justify-content: center;
+  place-items: center;
+  background-color: rgba(15, 24, 61, 0);
+  border-radius: 15px;
+  color: rgba(255, 255, 255, 0);
+}
+
+.projects_list_hint {
+  color: rgba(255, 255, 255, 0.856);
+  font-size: calc(0.25vw + 0.6rem);
+  font-style: italic;
 }
 
 .about_wrapper 
 {
   width: 100vw;
   height: 100vh;
-  background-color: rgb(124, 29, 29);
+  background-color: rgb(16, 17, 25);
 
 }
 
@@ -243,13 +273,13 @@ p
 .about_title 
 {
   font-size: calc(1.0vw + 1.2rem);
-  color: #ffffff;
+  color: #e1e1e1;
 }
 
 .about_description 
 {
   font-size: calc(0.5vw + 0.6rem);
-  color: rgb(226, 226, 226);
+  color: rgb(189, 189, 189);
 }
 
 .about_portfolio 
@@ -260,10 +290,6 @@ p
   flex-direction: column;
   text-align: left;
   row-gap: 2vh;
-}
-
-.project_wrapper 
-{
 }
 
 .project_container 

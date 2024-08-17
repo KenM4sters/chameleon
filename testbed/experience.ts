@@ -63,7 +63,7 @@ export class Experience extends StateResponder
         // View Frustum (maybe all of these should be part of the framework?).
         //
         
-        let camera = new cml.PerspectiveCamera([0.0, 0.0, 25.0]);
+        let camera = new cml.PerspectiveCamera([0.0, 4.0, 20.0]);
         camera.target = [0.0, 0.0, 0.0];
         let uProjection = cml.createUniformResource({type: "Mat4x4f", data: new Float32Array(camera.GetProjectionMatrix(1.0, 1.0)), name: "u_projection", writeFrequency: cml.WriteFrequency.Dynamic, accessType: cml.ResourceAccessType.PerFrame});
         let uView = cml.createUniformResource({type: "Mat4x4f", data: new Float32Array(camera.GetViewMatrix()), name: "u_view", writeFrequency: cml.WriteFrequency.Dynamic, accessType: cml.ResourceAccessType.PerFrame});
@@ -92,10 +92,12 @@ export class Experience extends StateResponder
         // Listeners
         //
         window.addEventListener("resize", () => this.respondToWindowResize());
-        // window.addEventListener("wheel", (e : WheelEvent) => this.respondToScroll(e));
-        window.addEventListener("mousemove", (e : MouseEvent) => this.respondToMouseMove(e));
+        window.addEventListener("wheel", (e : WheelEvent) => this.respondToScroll(e));
+        window.addEventListener("mousemove", (e : MouseEvent) => this.respondToMouseMove(e.clientX, e.clientY));
         window.addEventListener("click", (e : MouseEvent) => this.respondToMouseClick(e));
         window.addEventListener("close", () => {});
+
+        this.respondToMouseMove(0, 0);
     }
 
     public run() : void 
@@ -117,16 +119,16 @@ export class Experience extends StateResponder
         });  
     }
 
-    private respondToMouseMove(e : MouseEvent) : void
+    private respondToMouseMove(pos_x: number, pos_y: number) : void
     {
-        let yPos = ((e.clientY - this.canvas.height) * -1) / this.canvas.height;
-        let xPos = e.clientX / this.canvas.width;
+        let yPos = ((pos_y - this.canvas.height) * -1) / this.canvas.height;
+        let xPos = pos_x / this.canvas.width;
         this.currentMousePosition = [xPos, yPos];  
         this.uMousePosition.update(new Float32Array(this.currentMousePosition));
         
         const rect = this.canvas.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
+        const mouseX = pos_x - rect.left;
+        const mouseY = pos_y - rect.top;
         
         if(this.getCurrentView() == "home") 
         {
@@ -138,9 +140,9 @@ export class Experience extends StateResponder
         clip_space_mouse_position[0] = xPos * 2 - 1;
         clip_space_mouse_position[1] = yPos * 2 - 1;
         
-        let clip_pos = glm.vec4.fromValues(clip_space_mouse_position[0], clip_space_mouse_position[1], -1.0, 1.0);
+        let clip_pos = glm.vec4.fromValues(clip_space_mouse_position[0], clip_space_mouse_position[1], 0.99, 1.0);
 
-        let inverse_projection = glm.mat4.invert(glm.mat4.create(), this.camera.perspectiveCamera.GetProjectionMatrix(this.canvas.width, this.canvas.height));
+        let inverse_projection = glm.mat4.invert(glm.mat4.create(), this.camera.perspectiveCamera.GetProjectionMatrix(1.0, 1.0));
 
         let view_space = glm.vec4.transformMat4(glm.vec4.create(), clip_pos, inverse_projection);
 
@@ -149,22 +151,32 @@ export class Experience extends StateResponder
         let model_space = glm.vec4.transformMat4(glm.vec4.create(), view_space, inverse_view);
 
         glm.vec4.scale(model_space, model_space, 1 / model_space[3]);
-        
-        console.log(model_space);
 
         this.projectsList.traverse((project) => {
-            let target_mouse_matrix = glm.mat4.targetTo(
-                glm.mat4.create(), 
-                project.position, 
-                glm.vec3.fromValues(model_space[0], model_space[1], -4.0), 
-                glm.vec3.fromValues(0, 1, 0)
-            );
 
-            project.modelMatrix = glm.mat4.create();
-            glm.mat4.translate(project.modelMatrix, project.modelMatrix, project.position);
-            glm.mat4.multiply(project.modelMatrix, project.modelMatrix, target_mouse_matrix);
-            glm.mat4.scale(project.modelMatrix, project.modelMatrix, project.scale);
-            project.uModelMatrix.update(new Float32Array(project.modelMatrix));
+            const project_dir = glm.vec3.subtract(glm.vec3.create(), project.position, glm.vec3.fromValues(model_space[0], model_space[1], model_space[2]));
+
+            if(glm.vec3.length(project_dir) < 8.5) 
+            {
+                let target_mouse_matrix = glm.mat4.targetTo(
+                    glm.mat4.create(), 
+                    project.position, 
+                    glm.vec3.fromValues(model_space[0], model_space[1], -4.0), 
+                    glm.vec3.fromValues(0, 1, 0)
+                );
+    
+                project.modelMatrix = glm.mat4.create();
+                // glm.mat4.multiply(project.modelMatrix, project.modelMatrix, target_mouse_matrix);
+                glm.mat4.translate(project.modelMatrix, project.modelMatrix, project.position);
+                glm.mat4.scale(project.modelMatrix, project.modelMatrix, project.scale);
+                project.uModelMatrix.update(new Float32Array(project.modelMatrix));
+            } else {
+                project.modelMatrix = glm.mat4.create();
+                glm.mat4.translate(project.modelMatrix, project.modelMatrix, project.position);
+                glm.mat4.scale(project.modelMatrix, project.modelMatrix, project.scale);
+                project.uModelMatrix.update(new Float32Array(project.modelMatrix));
+            }
+
         })
     }  
 
@@ -189,27 +201,7 @@ export class Experience extends StateResponder
     {
         if(this.getCurrentView() == "home") 
         {            
-            this.projectsList.traverse((mesh : ProjectMesh) => 
-            {
-                glm.vec3.add(mesh.position, mesh.position, [0, 0, e.deltaY * 0.002]);
-    
-                if(mesh.position[2] < 3.2 && mesh.position[2] > 2.8) 
-                {
-                    mesh.position[1] = Math.max(Math.sin(mesh.position[2]) * 4.0, 0.0);
-                } else 
-                {
-                    if(mesh.position[1] > 0.0) 
-                    {
-                        mesh.position[1] -= 0.05;
-                    }
-                }
-    
-                mesh.modelMatrix = glm.mat4.create();
-                glm.mat4.translate(mesh.modelMatrix, mesh.modelMatrix, mesh.position);
-                glm.mat4.scale(mesh.modelMatrix, mesh.modelMatrix, mesh.scale);
-    
-                mesh.uModelMatrix.update(new Float32Array(mesh.modelMatrix));
-            });
+            this.projectsList.update(e);
         }
     }
 
@@ -244,6 +236,13 @@ export class Experience extends StateResponder
                 if(mesh.id == pixel[0]) 
                 {
                     this.intersectedProject = mesh.id;
+                    mesh.isIntersected = 1;
+                    mesh.uIsIntersected.update(mesh.isIntersected);
+                } 
+                else 
+                {
+                    mesh.isIntersected = 0;
+                    mesh.uIsIntersected.update(mesh.isIntersected);
                 }
             });            
         }
@@ -251,6 +250,11 @@ export class Experience extends StateResponder
         {
             app.style.cursor = "default";
             this.intersectedProject = null;
+
+            this.projectsList.traverse((mesh : ProjectMesh) => {
+                mesh.isIntersected = 0;
+                mesh.uIsIntersected.update(mesh.isIntersected);
+            });  
         }
     }
 
