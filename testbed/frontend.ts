@@ -111,10 +111,6 @@ export class Frontend extends StateResponder
                 }
             })
         });
-
-
-        // Navigate to home on instantation.
-        this.triggerViewChange("home");
     } 
 
     private handleViewChange(view : View) : void 

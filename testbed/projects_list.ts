@@ -114,6 +114,7 @@ export class ProjectsList
         this.meshes = [];
         this.project_positions = [];
         this.current_angle = 0;
+        this.radius = 5.0;
     }
 
     public create(uProjection : cml.UniformResource, uView : cml.UniformResource) : void 
@@ -167,9 +168,9 @@ export class ProjectsList
         {
             const angle = division * i;
 
-            const x_pos = Math.cos(angle) * 5.0;
+            const x_pos = Math.cos(angle) * this.radius;
             const y_pos = 0;
-            const z_pos = Math.sin(angle) * 5.0;
+            const z_pos = Math.sin(angle) * this.radius;
 
             this.project_positions.push(glm.vec3.fromValues(x_pos, y_pos, z_pos));
         }
@@ -178,20 +179,20 @@ export class ProjectsList
         //
         let projectMeshes : ProjectMeshProps[] = 
         [
-            {id: ProjectID.wgpu,            label: "wgpu_1",           translation:this.project_positions[0], scale: [0.8, 1.0, 0.08], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.actixWeb,        label: "actix_web_1",           translation:this.project_positions[1], scale: [0.8, 1.0, 0.08], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.mammoth,         label: "mammoth_1",           translation: this.project_positions[2], scale: [0.8, 1.0, 0.08], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.silverback,      label: "silverback_1",           translation: this.project_positions[3], scale: [0.8, 1.0, 0.08], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.pbr,             label: "pbr_1",         translation:this.project_positions[4], scale: [0.8, 1.0, 0.08], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.sandbox,         label: "sandbox_1",           translation:this.project_positions[5], scale: [0.8, 1.0, 0.08], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.vulkanLights,    label: "vulkan_lights_1",     translation: this.project_positions[6], scale: [0.8, 1.0, 0.08], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.raytracer,       label: "raytracer_1",         translation: this.project_positions[7], scale: [0.8, 1.0, 0.08], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.shmup,           label: "shmup_1",             translation: this.project_positions[8], scale: [0.8, 1.0, 0.08], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.chameleon,       label: "chameleon_1", translation: this.project_positions[9], scale: [0.8, 1.0, 0.08], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.bankingApp,      label: "banking_app_1",           translation: this.project_positions[10], scale: [0.8, 1.0, 0.08], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.gamesList,       label: "games_list_1",        translation: this.project_positions[11], scale: [0.8, 1.0, 0.08], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.gravitySimulator,label: "gravity_simulator_1",        translation: this.project_positions[12], scale: [0.8, 1.0, 0.08], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
-            {id: ProjectID.primeNumbers,    label: "prime_numbers_1",        translation: this.project_positions[13], scale: [0.8, 1.0, 0.08], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.wgpu,            label: "wgpu_1",           translation:this.project_positions[0], scale: [0.8, 1.0, 0.12], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.actixWeb,        label: "actix_web_1",           translation:this.project_positions[1], scale: [0.8, 1.0, 0.12], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.mammoth,         label: "mammoth_1",           translation: this.project_positions[2], scale: [0.8, 1.0, 0.12], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.silverback,      label: "silverback_1",           translation: this.project_positions[3], scale: [0.8, 1.0, 0.12], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.pbr,             label: "pbr_1",         translation:this.project_positions[4], scale: [0.8, 1.0, 0.12], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.sandbox,         label: "sandbox_1",           translation:this.project_positions[5], scale: [0.8, 1.0, 0.12], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.vulkanLights,    label: "vulkan_lights_1",     translation: this.project_positions[6], scale: [0.8, 1.0, 0.12], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.raytracer,       label: "raytracer_1",         translation: this.project_positions[7], scale: [0.8, 1.0, 0.12], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.shmup,           label: "shmup_1",             translation: this.project_positions[8], scale: [0.8, 1.0, 0.12], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.chameleon,       label: "chameleon_1", translation: this.project_positions[9], scale: [0.8, 1.0, 0.12], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.bankingApp,      label: "banking_app_1",           translation: this.project_positions[10], scale: [0.8, 1.0, 0.12], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.gamesList,       label: "games_list_1",        translation: this.project_positions[11], scale: [0.8, 1.0, 0.12], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.gravitySimulator,label: "gravity_simulator_1",        translation: this.project_positions[12], scale: [0.8, 1.0, 0.12], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
+            {id: ProjectID.primeNumbers,    label: "prime_numbers_1",        translation: this.project_positions[13], scale: [0.8, 1.0, 0.12], vertexInput: this.cube_input, program: this.project_program, sampler: this.cube_sampler},
         ];
 
 
@@ -216,7 +217,7 @@ export class ProjectsList
     }
 
     public update(e: WheelEvent) : void {
-        let delta = e.deltaY * 0.001;
+        let delta = e.deltaY * 0.0005;
 
         this.current_angle += delta;
 
@@ -226,9 +227,9 @@ export class ProjectsList
         this.traverse((mesh: ProjectMesh) => {
             let angle = this.current_angle + i * angle_between_cubes;
 
-            let x = 5.0 * Math.cos(angle);
+            let x = this.radius * Math.cos(angle);
             let y = 0;
-            let z = 5.0 * Math.sin(angle);
+            let z = this.radius * Math.sin(angle);
     
             // Set the position of the cube
             mesh.position = [x, y, z];
@@ -293,4 +294,5 @@ export class ProjectsList
 
     private project_positions !: glm.vec3[];
     private current_angle !: number;
+    private radius !: number;
 };

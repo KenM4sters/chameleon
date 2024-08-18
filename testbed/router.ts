@@ -42,6 +42,9 @@ export class Router extends StateResponder
         {
             this.triggerViewChange(event.state ? event.state.path : "home")
         });
+
+        // Navigate to home on instantation.
+        this.triggerViewChange("home");
     }
 
     public navigateTo(view : View) : void 

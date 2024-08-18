@@ -22,11 +22,18 @@ p
 @keyframes fadeIn {
   from {
       opacity: 0;
-      /* scale: 0.95; */
   }
   to {
       opacity: 1;
-      /* scale: 1.0; */
+  }
+}
+
+@keyframes scaleIn {
+  from {
+      scale: 0.95;
+  }
+  to {
+      scale: 1.0;
   }
 }
 
@@ -38,6 +45,16 @@ p
 .fade_out
 {
   animation: fadeIn 1.0s reverse
+}
+
+.scale_in 
+{
+  animation: scaleIn 1.0s
+}
+
+.scale_out
+{
+  animation: scaleIn 1.0s reverse
 }
 
 
@@ -63,7 +80,29 @@ p
   display: flex;
   justify-content: start;
   flex-direction: column;
+}
 
+.preloader_wrapper 
+{
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  place-items: center;
+  flex-direction: column;
+  row-gap: 5vh;
+  background-color: rgb(12, 17, 21);
+}
+
+.preloader_icon {
+  animation: fadeIn 0.5s infinite;
+  width: 2vw;
+  height: 5vh;
+  background: white;
+}
+
+.preloader_caption {
+  color: rgb(218, 218, 218);
 }
 
 .content_section 
@@ -91,7 +130,7 @@ p
 
 .header_container 
 {
-  width: 90%;
+  width: 93%;
   height: 50%;
   display: flex;
   justify-content: space-between;
@@ -197,6 +236,7 @@ p
 .home_title_container h1
 {
   top: 95%;
+  left: 1%;
   position: absolute;
   color: rgb(201, 206, 211);
   font-weight: 300;
