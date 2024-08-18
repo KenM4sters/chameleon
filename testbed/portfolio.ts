@@ -51,9 +51,7 @@ export class Portfolio
             throw new Error("Failed to find home element");
         }
 
-        console.log(home);
-        home.innerHTML = preloader_html;  
-              
+        home.innerHTML = preloader_html;                
     
         resources.LoadAllAssets(() => 
         {
