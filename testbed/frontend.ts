@@ -160,6 +160,8 @@ export class Frontend extends StateResponder
         this.app.style.overflowY = "visible";
         this.app.style.cursor = "default";
 
+        this.app.classList.add("fade_white");
+
         this.aboutLink.classList.remove("active");
         this.aboutLink.classList.remove("expanded");
         this.homeLink.classList.remove("active");

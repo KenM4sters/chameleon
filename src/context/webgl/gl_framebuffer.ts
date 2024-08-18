@@ -2,8 +2,6 @@ import { FrameBuffer, Texture } from "../common/context";
 import { Attachment, Format, FrameBufferAttachment, FrameBufferProps, SamplerFilterMode, ValueType } from "../../graphics";
 import { g_glAttachments, g_glFormats, g_glTargetTypes, g_glValueTypes, gl } from "./gl_context";
 import { GLTexture } from "./gl_texture";
-import { log } from "three/examples/jsm/nodes/Nodes.js";
-
 
 
 export class GLFrameBuffer extends FrameBuffer 
