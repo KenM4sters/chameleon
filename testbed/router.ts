@@ -25,8 +25,9 @@ export class Router extends StateResponder
     constructor() 
     {
         super();
-
+ 
         this.handleViewChange = this.handleViewChange.bind(this);
+
         this.onViewChange(this.handleViewChange);
 
         const contentWrapper = document.querySelector(".content_wrapper");
@@ -49,7 +50,7 @@ export class Router extends StateResponder
 
     public navigateTo(view : View) : void 
     {
-        const path = `/${view}`;
+        const path = `/chameleon/${view}`;
         
         // Update the URL and push the state to the history stack
         history.pushState({ path: view }, "", path);
@@ -71,7 +72,6 @@ export class Router extends StateResponder
                 section.classList.remove("active");                                     
             }
         });
-    
 
 
         // Show the target section
