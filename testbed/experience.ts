@@ -36,7 +36,6 @@ export class Experience extends StateResponder
         this.canvas.width = window.innerWidth;       
         this.canvas.height = window.innerHeight;
 
-
         // Init.
         //
         let settings : cml.GraphicsSettings = 
@@ -263,11 +262,8 @@ export class Experience extends StateResponder
         const new_width = window.innerWidth;
         const new_height = window.innerHeight;
 
-        if(new_width != this.canvas.width || new_height != this.canvas.height) 
-        {
-            this.canvas.width = new_width;
-            this.canvas.height = new_height;
-        }
+        this.canvas.width = new_width;
+        this.canvas.height = new_height;
 
         this.uCanvasDimensions.update(new Float32Array([new_width, new_height]));
 

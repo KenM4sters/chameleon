@@ -254,7 +254,7 @@ export class Renderer
         this.sceneColorTexture.resize(width * this.highResolutionFactor, height * this.highResolutionFactor);
         this.meshIdTexture.resize(width * this.highResolutionFactor, height * this.highResolutionFactor);
         this.sceneDepthTexture.resize(width * this.highResolutionFactor, height * this.highResolutionFactor);
-        this.FXAATexture.resize(width, height);
+        this.FXAATexture.resize(width, height);        
     }
 
     private vbo !: cml.VertexBuffer;

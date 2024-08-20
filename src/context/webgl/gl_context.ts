@@ -162,6 +162,18 @@ class GLGraphicsContext extends IGraphicsContext
             console.error('Framebuffer is not complete.');
         }
 
+        window.addEventListener("resize", () => {
+            gl.bindFramebuffer(gl.FRAMEBUFFER, this.MSAAFrameBuffer);
+            gl.bindRenderbuffer(gl.RENDERBUFFER, this.MSAARenderBuffer);
+            gl.renderbufferStorageMultisample(gl.RENDERBUFFER, gl.getParameter(gl.MAX_SAMPLES), gl.RGBA8, window.innerWidth, window.innerHeight);
+            gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, this.MSAARenderBuffer);
+            
+            if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) 
+            {
+                console.error('Framebuffer is not complete.');
+            }            
+        });
+
     }
 
     public override shutdown() : void 
@@ -270,6 +282,7 @@ class GLGraphicsContext extends IGraphicsContext
         if(!this.isLastBuffer) 
         {            
             gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+            gl.bindRenderbuffer(gl.RENDERBUFFER, null);
             gl.activeTexture(gl.TEXTURE0);
             gl.bindTexture(gl.TEXTURE_2D, null);
         }
