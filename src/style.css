@@ -399,7 +399,7 @@ p
 .project_title
 {
   text-transform: uppercase;
-  font-size: calc(2.0vw + 0.1rem);
+  font-size: calc(1.5vw + 0.1rem);
   color: rgb(24, 24, 24);
   font-weight: 400;
 }
@@ -414,7 +414,7 @@ p
 
 .metadata_item_title
 {
-  font-size: calc(1.0vh + 0.3rem);
+  font-size: calc(1.0vh + 0.2rem);
   text-transform: uppercase;
   color: rgb(34, 34, 34);
   margin-bottom: 0.2vh;
@@ -422,14 +422,14 @@ p
 
 .metadata_item_description
 {
-  font-size: calc(0.8vh + 0.3rem);
+  font-size: calc(1.0vh + 0.2rem);
   color: #3f3f3fe5;
 }
 
 .metadata_item_link
 {
   text-decoration: none;
-  font-size: calc(0.8vh + 0.3rem);
+  font-size: calc(1.0vh + 0.2rem);
   color: #3f3f3fe5;
 }
 
