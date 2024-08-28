@@ -33,5 +33,10 @@
       <canvas id="webgl"></canvas>
     </div>
     <script type="module" src="/src/main.ts"></script>
+    <script>
+      if (window.location.pathname !== '/') {
+        window.location.replace('/');
+      }
+    </script>
   </body>
 </html>
